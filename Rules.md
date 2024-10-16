@@ -1,4 +1,4 @@
-# Validation Rules
+# The list of built-in validation rules
 
 This document describes the validation rules available in the `Azolee\Validator\ValidationRules` class.
 
