@@ -1,6 +1,6 @@
-# Laravel-like Array Validator
+# Laravel-like Validator
 
-Azolee Validator is a PHP validation library designed to help you validate data structures with ease. It supports various validation rules, custom rules, and nested data validation.
+The Laravel-like Validator is a PHP validation library designed to help you validate data structures with ease. It supports various validation rules, custom rules, and nested data validation.
 
 ## Installation
 
