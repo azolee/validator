@@ -12,6 +12,8 @@ composer require azolee/validator
 
 ## Usage
 
+For a complete list of available validation rules, please refer to the [Validation Rules](Rules.md) document.
+
 ### Basic Usage
 
 To use the validator, you need to define your validation rules and the data to be validated. Then, call the `Validator::make` method.

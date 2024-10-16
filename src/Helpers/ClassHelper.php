@@ -38,9 +38,9 @@ class ClassHelper
         throw new InvalidArgumentException("Unknown callable type");
     }
 
-    public static function is_callable($callable): bool
+    public static function isCallable($callable): bool
     {
-        if (is_callable($callable)) {
+        if (is_callable($callable) && !static::isMethodNameBuiltIn($callable)) {
             return true;
         }
 
@@ -54,5 +54,12 @@ class ClassHelper
         }
 
         return false;
+    }
+
+    public static function isMethodNameBuiltIn($methodName)
+    {
+        $definedFunctions = get_defined_functions();
+        $builtInFunctions = $definedFunctions['internal'];
+        return in_array($methodName, $builtInFunctions);
     }
 }

@@ -73,7 +73,7 @@ class Validator
         }
 
         foreach ($rules as $rule) {
-            if (ClassHelper::is_callable($rule)) {
+            if (ClassHelper::isCallable($rule)) {
                 if ($this->applyCallableRule($rule, $key, $dataToValidate) === false) {
                     $this->lastValidationResult->setFailed("custom_rule", $key, $dataToValidate);
                     return;
