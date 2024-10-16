@@ -28,6 +28,8 @@ $validationRules = [
     'address.street' => ['string', 'not_equals_field:address.city', 'not_equals_field:address.street2', 'not_equals_field:address.no'],
     'address.street2' => 'not_null',
     'address.no' => 'string',
+    'images.*.url' => 'string',
+    'images.*.role' => 'string',
 ];
 
 $dataToValidate = [
@@ -41,6 +43,17 @@ $dataToValidate = [
         'street' => 'First Avenue',
         'street2' => '',
         'no' => '52A',
+    ],
+    'images' => [
+        [
+            'url' => 'image1.jpg'
+            'role' => 'profile_photo',
+        ],
+        [
+            'url' => 'image2.jpg'
+            'role' => 'album_photo',
+            'description' => 'This is a photo of me.',
+        ],
     ],
 ];
 
