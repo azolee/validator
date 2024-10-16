@@ -1,4 +1,4 @@
-# Laravel-like Validator
+# The Laravel-like data validator
 
 The Laravel-like Validator is a PHP validation library designed to help you validate data structures with ease. It supports various validation rules, custom rules, and nested data validation.
 
