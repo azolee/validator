@@ -6,6 +6,7 @@ use Azolee\Validator\Exceptions\InvalidValidationRule;
 use Azolee\Validator\Exceptions\ValidationException;
 use Azolee\Validator\Validator;
 use PHPUnit\Framework\TestCase;
+use Tests\CustomRules;
 
 class ValidatorTest extends TestCase
 {
@@ -540,6 +541,51 @@ class ValidatorTest extends TestCase
 
         $dataToValidate['name'] = '';
         $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertTrue($result->isFailed());
+    }
+
+    public function testMakeWithClassMethodRule()
+    {
+        $validationRules = [
+            'user.name' => [[CustomRules::class, 'isNotJohnDoe'], 'string'],
+        ];
+
+        $dataToValidate = [
+            'user' => [
+                'name' => 'John Smith'
+            ],
+        ];
+
+        $result = Validator::make($validationRules, $dataToValidate);
+
+        $this->assertFalse($result->isFailed());
+
+        $dataToValidate['user']['name'] = 'John Doe';
+        $result = Validator::make($validationRules, $dataToValidate);
+
+        $this->assertTrue($result->isFailed());
+    }
+
+    public function testMakeWithObjectMethodRule()
+    {
+        $customRules = new CustomRules();
+        $validationRules = [
+            'user.name' => [[$customRules, 'isNotJohnDoe'], 'string'],
+        ];
+
+        $dataToValidate = [
+            'user' => [
+                'name' => 'John Smith'
+            ],
+        ];
+
+        $result = Validator::make($validationRules, $dataToValidate);
+
+        $this->assertFalse($result->isFailed());
+
+        $dataToValidate['user']['name'] = 'John Doe';
+        $result = Validator::make($validationRules, $dataToValidate);
+
         $this->assertTrue($result->isFailed());
     }
 }

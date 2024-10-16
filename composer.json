@@ -3,7 +3,8 @@
     "description": "A Laravel like framework agnostic Validation package for PHP8.2",
     "autoload": {
         "psr-4": {
-            "Azolee\\Validator\\": "src/"
+            "Azolee\\Validator\\": "src/",
+            "Tests\\": "tests/"
         }
     },
     "license": "MIT",
