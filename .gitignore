@@ -2,6 +2,6 @@
 composer.lock
 .DS_Store
 .env
-/.phpunit.cache
+/.phpunit.result.cache
 *.log
 /.idea/*
