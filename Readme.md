@@ -62,7 +62,7 @@ You can also define custom validation rules using closures.
 $validationRules = [
     'user.name' => [
         function ($data) {
-            return $data === 'John Doe';
+            return $data !== 'John Doe';
         },
         'string',
     ],
@@ -70,7 +70,7 @@ $validationRules = [
 
 $dataToValidate = [
     'user' => [
-        'name' => 'John Doe'
+        'name' => 'John Smith'
     ],
 ];
 
