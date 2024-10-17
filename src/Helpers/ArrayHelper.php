@@ -4,7 +4,7 @@ namespace Azolee\Validator\Helpers;
 
 class ArrayHelper
 {
-    public static function parseNestedData(array $dataToValidate, string $keys): mixed
+    public static function parseNestedData(array $dataToValidate, string $keys, string $parentKey = ''): array
     {
         $result = $dataToValidate;
         $keysArr = explode('.', $keys);
@@ -13,20 +13,25 @@ class ArrayHelper
                 if (!is_array($result)) {
                     return [];
                 }
-                foreach ($result as $item) {
+                $allResults = [];
+                foreach ($result as $i => $item) {
                     if (is_array($item)) {
-                        return static::parseNestedData($item, implode('.', array_slice($keysArr, $index + 1)));
+                        $nestedResults = static::parseNestedData($item, implode('.', array_slice($keysArr, $index + 1)), $parentKey . $i . '.');
+                        foreach ($nestedResults as $nestedResult) {
+                            $allResults[] = $nestedResult;
+                        }
                     }
                 }
-                return "";
+                return $allResults;
             }
             if (array_key_exists($key, $result)) {
                 $result = $result[$key];
+                $parentKey .= $key . '.';
             } else {
                 return [];
             }
         }
 
-        return $result;
+        return [['value' => $result, 'key' => rtrim($parentKey, '.'), 'type' => gettype($result)]];
     }
 }

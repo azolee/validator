@@ -25,7 +25,6 @@ class Validator
     public static function make(array $validationRules, array $dataToValidate, bool $silent = true): ValidationResult
     {
         $validator = new static();
-
         try {
             foreach ($validationRules as $field => $rules) {
                 if ($validator->validateRuleTypes($rules) === false) {
@@ -69,7 +68,7 @@ class Validator
     protected function evaluate(string|array|callable $rules, string $key, mixed $dataToValidate): void
     {
         if (!is_array($rules)) {
-            $rules = [$rules];
+            $rules = (is_string($rules) && str_contains($rules, '|')) ? explode('|', $rules) : [$rules];
         }
 
         foreach ($rules as $rule) {
@@ -106,11 +105,19 @@ class Validator
             [$method, $additionalAttribute] = explode(':', $rule, 2);
         }
 
-        if (method_exists($validationRules, $method)) {
-            return $validationRules::$method($dataToValidate, $key, $additionalAttribute);
+        if (!method_exists($validationRules, $method)) {
+            throw new InvalidValidationRule("Validaton method $method not implemented.");
         }
 
-        throw new InvalidValidationRule("Validaton method $method not implemented.");
+        $dataSet = ArrayHelper::parseNestedData($dataToValidate, $key);
+
+        foreach ($dataSet as $data) {
+            $result = $validationRules::$method($data['value'], $data['key'], $additionalAttribute, $dataToValidate);
+            if ($result === false) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -120,16 +127,33 @@ class Validator
      */
     private function applyCallableRule(array|callable $rule, string $key, mixed $dataToValidate): bool
     {
-        $reflectionOfTheRule = ClassHelper::getReflectionForCallable($rule);
-        if ($reflectionOfTheRule->getNumberOfParameters() < 1 || $reflectionOfTheRule->getNumberOfParameters() > 3) {
-            throw new InvalidValidationRule("Invalid validaton closure passed for $key. Rule should have 1-3 attributes: data, key and the dataArray.");
-        }
+        ClassHelper::validateCallable($rule, "Invalid closure passed for $key: should have 1-3 attributes: data, key and the dataArray.");
 
         $data = $dataToValidate;
         if ($key) {
-            $data = ArrayHelper::parseNestedData($dataToValidate, $key);
+            $data = ArrayHelper::parseNestedData($dataToValidate, $key) ?? [];
         }
 
-        return call_user_func($rule, $data, $key, $dataToValidate);
+        $handleItem = function ($item) use ($rule, $key, $dataToValidate) {
+            if (array_key_exists('value', $item) === false || array_key_exists('key', $item) === false) {
+                throw new InvalidArgumentException("Invalid data structure for $key.");
+            }
+            $result = call_user_func($rule, ($item['value'] ?? null), ($item['key'] ?? $key), $dataToValidate);
+            if (gettype($result) !== 'boolean') {
+                throw new InvalidValidationRule("Validation rule for $key should return a boolean.");
+            }
+            return $result;
+        };
+
+        if (!array_is_list($data)) {
+            return $handleItem($data);
+        }
+
+        foreach ($data as $item) {
+            if ($handleItem($item) === false) {
+                return false;
+            }
+        }
+        return true;
     }
 }

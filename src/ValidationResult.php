@@ -17,7 +17,7 @@ class ValidationResult
     {
         $validationError = new ValidationError();
         $this->failedRules[] = [
-                'rule' => is_callable($rule) ? 'custom_rule' : $rule,
+                'rule' => is_callable($rule) ? ValidationRules::CUSTOM_RULE : $rule,
                 'key' => $key,
                 'data' => $dataToValidate,
                 'message' => $message ?? $validationError->getErrorFor($rule, $key),

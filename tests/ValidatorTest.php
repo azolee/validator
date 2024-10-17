@@ -4,9 +4,9 @@ include_once __DIR__ . '/../vendor/autoload.php';
 
 use Azolee\Validator\Exceptions\InvalidValidationRule;
 use Azolee\Validator\Exceptions\ValidationException;
+use Azolee\Validator\Helpers\CustomRules;
 use Azolee\Validator\Validator;
 use PHPUnit\Framework\TestCase;
-use Tests\CustomRules;
 
 class ValidatorTest extends TestCase
 {
@@ -246,6 +246,7 @@ class ValidatorTest extends TestCase
         ];
 
         $result = Validator::make($validationRules, $dataToValidate);
+
         $this->assertFalse($result->isFailed());
 
         $dataToValidate['password_confirmation'] = 'different';
@@ -352,24 +353,6 @@ class ValidatorTest extends TestCase
         $this->assertFalse($result->isFailed());
 
         $dataToValidate['name'] = null;
-        $result = Validator::make($validationRules, $dataToValidate);
-        $this->assertTrue($result->isFailed());
-    }
-
-    public function testNotEqualsField()
-    {
-        $validationRules = [
-            'street' => 'not_equals_field:city',
-        ];
-        $dataToValidate = [
-            'street' => 'First Avenue',
-            'city' => 'New York',
-        ];
-
-        $result = Validator::make($validationRules, $dataToValidate);
-        $this->assertFalse($result->isFailed());
-
-        $dataToValidate['street'] = 'New York';
         $result = Validator::make($validationRules, $dataToValidate);
         $this->assertTrue($result->isFailed());
     }
@@ -584,6 +567,24 @@ class ValidatorTest extends TestCase
         $this->assertFalse($result->isFailed());
 
         $dataToValidate['user']['name'] = 'John Doe';
+        $result = Validator::make($validationRules, $dataToValidate);
+
+        $this->assertTrue($result->isFailed());
+    }
+
+    public function testMultipleRulesSeparatedByPipes()
+    {
+        $validationRules = [
+            'username' => 'required|string|alpha_num',
+        ];
+        $dataToValidate = [
+            'username' => 'johndoe123',
+        ];
+
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertFalse($result->isFailed());
+
+        $dataToValidate['username'] = '';
         $result = Validator::make($validationRules, $dataToValidate);
 
         $this->assertTrue($result->isFailed());

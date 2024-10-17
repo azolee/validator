@@ -2,6 +2,7 @@
 
 namespace Azolee\Validator\Helpers;
 
+use Azolee\Validator\Exceptions\InvalidValidationRule;
 use InvalidArgumentException;
 use ReflectionException;
 use ReflectionFunction;
@@ -61,5 +62,17 @@ class ClassHelper
         $definedFunctions = get_defined_functions();
         $builtInFunctions = $definedFunctions['internal'];
         return in_array($methodName, $builtInFunctions);
+    }
+
+    /**
+     * @throws InvalidValidationRule
+     * @throws ReflectionException
+     */
+    public static function validateCallable($rule, string $message): void
+    {
+        $reflectionOfTheRule = self::getReflectionForCallable($rule);
+        if ($reflectionOfTheRule->getNumberOfParameters() < 1 || $reflectionOfTheRule->getNumberOfParameters() > 3) {
+            throw new InvalidValidationRule($message);
+        }
     }
 }
