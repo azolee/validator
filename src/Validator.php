@@ -32,7 +32,7 @@ class Validator
                     if (!$silent) {
                         throw new InvalidValidationRule($message);
                     }
-                    $validator->lastValidationResult()->setFailed("invalid_rule", $field, $rules, $message);
+                    $validator->lastValidationResult()->setFailed('invalid_rule', $field, $rules, $message);
                     continue;
                 }
 
@@ -46,6 +46,7 @@ class Validator
             if (!$silent) {
                 throw $e;
             }
+            $validator->lastValidationResult()->setFailed('', '', $dataToValidate, $e->getMessage());
         }
 
         return $validator->lastValidationResult();
@@ -74,7 +75,7 @@ class Validator
         foreach ($rules as $rule) {
             if (ClassHelper::isCallable($rule)) {
                 if ($this->applyCallableRule($rule, $key, $dataToValidate) === false) {
-                    $this->lastValidationResult->setFailed("custom_rule", $key, $dataToValidate);
+                    $this->lastValidationResult->setFailed('custom_rule', $key, $dataToValidate);
                     return;
                 }
                 continue;

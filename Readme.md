@@ -12,7 +12,7 @@ composer require azolee/validator
 
 ## Usage
 
-For a complete list of available validation rules, please refer to the [Validation Rules](Rules.md) document.
+For a complete list of available validation rules, please refer to the [Validation Rules](docs/Rules.md) document.
 
 ### Basic Usage
 
@@ -122,6 +122,11 @@ try {
     echo "Caught a ValidationException: " . $e->getMessage();
 }
 ```
+## Additional Examples
+
+For more detailed examples, please refer to the following documents:
+- [Simple Examples](docs/SimpleExamples.md)
+- [Complex Examples](docs/ComplexExamples.md)
 
 ## Testing
 

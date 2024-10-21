@@ -18,7 +18,7 @@ class ValidatorTest extends TestCase
             'user.is_active' => 'boolean',
             'address' => 'array',
             'address.city' => 'string',
-            'address.street' => ['string', 'not_equals_field:address.city', 'not_equals_field:address.street2', 'not_equals_field:address.no'],
+            'address.street' => ['string', 'different:address.city', 'different:address.street2', 'different:address.no'],
             'address.street2' => 'not_null',
             'address.no' => 'string',
         ];
@@ -122,7 +122,7 @@ class ValidatorTest extends TestCase
             'user.is_active' => 'boolean',
             'address' => 'array',
             'address.city' => 'string',
-            'address.street' => ['string', 'not_equals_field:address.city', 'not_equals_field:address.street2', 'not_equals_field:address.no'],
+            'address.street' => ['string', 'different:address.city', 'different:address.street2', 'different:address.no'],
             'address.street2' => 'not_null',
             'address.no' => 'string',
             'images.*.url' => 'string',
@@ -161,6 +161,55 @@ class ValidatorTest extends TestCase
         $result = Validator::make($validationRules, $dataToValidate);
 
         $this->assertFalse($result->isFailed());
+    }
+
+    public function testFailingNestedData()
+    {
+        $validationRules = [
+            'user.name' => 'string',
+            'user.age' => 'numeric',
+            'user.is_active' => 'boolean',
+            'address' => 'array',
+            'address.city' => 'string',
+            'address.street' => ['string', 'different:address.city', 'different:address.street2', 'different:address.no'],
+            'address.street2' => 'not_null',
+            'address.no' => 'string',
+            'images.*.url' => 'string',
+            'images.*.role' => function ($data) {
+                return in_array($data, ['profile_photo', 'album_photo']);
+            },
+            'images.*.description' => 'string',
+        ];
+
+        $dataToValidate = [
+            'user' => [
+                'name' => 'John Doe',
+                'age' => 30,
+                'is_active' => true,
+            ],
+            'address' => [
+                'city' => 'New York',
+                'street' => 'First Avenue',
+                'street2' => '',
+                'no' => '52A',
+            ],
+            'images' => [
+                [
+                    'url' => 'image1.jpg',
+                    'role' => 'profile_photo',
+                    'description' => 'This is me this year.',
+                ],
+                [
+                    'url' => 'image2.jpg',
+                    'role' => 'just_an_image', //Invalid role
+                    'description' => null, //Invalid description
+                ],
+            ],
+        ];
+
+        $result = Validator::make($validationRules, $dataToValidate);
+
+        $this->assertTrue($result->isFailed());
     }
 
     public function testAlpha()

@@ -92,4 +92,4 @@ This document describes the validation rules available in the `Azolee\Validator\
 - **Description**: Validates that the data is not empty.
 - **Usage**: `required`
 
-[<< Back to Readme](Readme.md)
+[<< Back to Readme](../Readme.md)
