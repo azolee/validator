@@ -3,7 +3,7 @@
 This code uses a custom validation rule defined as a class method to ensure that the `user.name` field is not `John Doe`. It first checks a valid name (`John Smith`) and then an invalid one (`John Doe`).
 
 ```php
-use Azolee\Validator\Helpers\CustomRules;
+use Tests\Helpers\CustomRules;
 
 $validationRules = [
     'user.name' => [[CustomRules::class, 'isNotJohnDoe'], 'string'],

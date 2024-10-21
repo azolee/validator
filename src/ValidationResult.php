@@ -2,9 +2,18 @@
 
 namespace Azolee\Validator;
 
+use Azolee\Validator\Contracts\ValidationErrorBagInterface;
+use Azolee\Validator\Helpers\ClassHelper;
+
 class ValidationResult
 {
-    protected array $failedRules = [];
+
+    public function __construct(
+        protected ValidationErrorBagInterface $validationError = new ValidationErrorBag(),
+        protected array $failedRules = []
+    )
+    {
+    }
 
     /**
      * @param string $rule
@@ -15,12 +24,11 @@ class ValidationResult
      */
     public function setFailed(string $rule, string $key, mixed $dataToValidate, ?string $message = null): void
     {
-        $validationError = new ValidationError();
         $this->failedRules[] = [
-                'rule' => is_callable($rule) ? ValidationRules::CUSTOM_RULE : $rule,
+                'rule' => ClassHelper::isCallable($rule) ? ValidationRules::CUSTOM_RULE : $rule,
                 'key' => $key,
                 'data' => $dataToValidate,
-                'message' => $message ?? $validationError->getErrorFor($rule, $key),
+                'message' => $message ?? $this->validationError->getErrorFor($rule, $key),
             ];
     }
 
@@ -45,11 +53,10 @@ class ValidationResult
      */
     public function getErrorsForFailure(): string
     {
-        $validationError = new ValidationError();
         $errors = [];
 
         foreach ($this->failedRules as $failedRule) {
-            $errors[] = $failedRule['message'] ?? $validationError->getErrorFor($failedRule['rule'], $failedRule['key']);
+            $errors[] = $failedRule['message'] ?? $this->validationError->getErrorFor($failedRule['rule'], $failedRule['key']);
         }
 
         return join(", ", $errors);

@@ -2,6 +2,7 @@
 
 namespace Azolee\Validator;
 
+use Azolee\Validator\Contracts\ValidationErrorBagInterface;
 use Azolee\Validator\Exceptions\InvalidValidationRule;
 use Azolee\Validator\Exceptions\ValidationException;
 use Azolee\Validator\Helpers\ArrayHelper;
@@ -22,9 +23,15 @@ class Validator
      * @throws ReflectionException
      * @throws ValidationException
      */
-    public static function make(array $validationRules, array $dataToValidate, bool $silent = true): ValidationResult
-    {
-        $validator = new static();
+    public static function make(
+        array $validationRules,
+        array $dataToValidate,
+        bool $silent = true,
+        ValidationErrorBagInterface $validationErrorBag = null
+    ): ValidationResult {
+        $validationResult = new ValidationResult($validationErrorBag ?? new ValidationErrorBag());
+        $validator = new self($validationResult);
+
         try {
             foreach ($validationRules as $field => $rules) {
                 if ($validator->validateRuleTypes($rules) === false) {

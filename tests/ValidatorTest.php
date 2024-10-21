@@ -4,9 +4,9 @@ include_once __DIR__ . '/../vendor/autoload.php';
 
 use Azolee\Validator\Exceptions\InvalidValidationRule;
 use Azolee\Validator\Exceptions\ValidationException;
-use Azolee\Validator\Helpers\CustomRules;
 use Azolee\Validator\Validator;
 use PHPUnit\Framework\TestCase;
+use Tests\Helpers\CustomRules;
 
 class ValidatorTest extends TestCase
 {
