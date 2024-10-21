@@ -2,9 +2,9 @@
 
 namespace Tests;
 
+use Azolee\Validator\Helpers\ErrorBags;
 use Azolee\Validator\Validator;
 use PHPUnit\Framework\TestCase;
-use Tests\Helpers\ErrorBags;
 
 class ValidatorWithCustomErrorBagTest extends TestCase
 {

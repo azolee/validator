@@ -2,8 +2,8 @@
 
 namespace Tests;
 
+use Azolee\Validator\Helpers\ErrorBags;
 use PHPUnit\Framework\TestCase;
-use Tests\Helpers\ErrorBags;
 
 class CustomValidationErrorBagTest extends TestCase
 {
