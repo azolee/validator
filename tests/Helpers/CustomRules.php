@@ -1,6 +1,6 @@
 <?php
 
-namespace Azolee\Validator\Helpers;
+namespace Tests\Helpers;
 
 class CustomRules
 {

@@ -2,6 +2,7 @@
 
 namespace Azolee\Validator;
 
+use Azolee\Validator\Contracts\ValidationErrorBagInterface;
 use Azolee\Validator\Exceptions\InvalidValidationRule;
 use Azolee\Validator\Exceptions\ValidationException;
 use Azolee\Validator\Helpers\ArrayHelper;
@@ -22,9 +23,15 @@ class Validator
      * @throws ReflectionException
      * @throws ValidationException
      */
-    public static function make(array $validationRules, array $dataToValidate, bool $silent = true): ValidationResult
-    {
-        $validator = new static();
+    public static function make(
+        array $validationRules,
+        array $dataToValidate,
+        bool $silent = true,
+        ValidationErrorBagInterface $validationErrorBag = null
+    ): ValidationResult {
+        $validationResult = new ValidationResult($validationErrorBag ?? new ValidationErrorBag());
+        $validator = new self($validationResult);
+
         try {
             foreach ($validationRules as $field => $rules) {
                 if ($validator->validateRuleTypes($rules) === false) {
@@ -32,7 +39,7 @@ class Validator
                     if (!$silent) {
                         throw new InvalidValidationRule($message);
                     }
-                    $validator->lastValidationResult()->setFailed("invalid_rule", $field, $rules, $message);
+                    $validator->lastValidationResult()->setFailed('invalid_rule', $field, $rules, $message);
                     continue;
                 }
 
@@ -46,6 +53,7 @@ class Validator
             if (!$silent) {
                 throw $e;
             }
+            $validator->lastValidationResult()->setFailed('', '', $dataToValidate, $e->getMessage());
         }
 
         return $validator->lastValidationResult();
@@ -74,7 +82,7 @@ class Validator
         foreach ($rules as $rule) {
             if (ClassHelper::isCallable($rule)) {
                 if ($this->applyCallableRule($rule, $key, $dataToValidate) === false) {
-                    $this->lastValidationResult->setFailed("custom_rule", $key, $dataToValidate);
+                    $this->lastValidationResult->setFailed('custom_rule', $key, $dataToValidate);
                     return;
                 }
                 continue;

@@ -2,7 +2,10 @@
 
 namespace Azolee\Validator;
 
-class ValidationError
+use Azolee\Validator\Contracts\ValidationErrorBagInterface;
+use Azolee\Validator\Helpers\ErrorsHelper;
+
+class ValidationErrorBag implements ValidationErrorBagInterface
 {
     private array $list = [
         ValidationRules::CUSTOM_RULE => 'The :attribute is invalid.',
@@ -18,20 +21,6 @@ class ValidationError
      * */
     public function getErrorFor(array|string $rules, string $attribute): string
     {
-        $errors = [];
-        if (!is_array($rules)) {
-            $rules = [$rules];
-        }
-
-        foreach ($rules as $rule) {
-            $additionalAttribute = "";
-            if (str_contains($rule, ':')) {
-                [$rule, $additionalAttribute] = explode(':', $rule, 2);
-            }
-
-            $error = str_ireplace(':attribute', $attribute, $this->list[$rule] ?? "The $attribute is invalid.");
-            $errors[] = str_ireplace(':key', $additionalAttribute, $error);
-        }
-        return join(", ", $errors);
+        return ErrorsHelper::getError($this->list, $rules, $attribute);
     }
 }
