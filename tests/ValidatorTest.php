@@ -576,6 +576,171 @@ class ValidatorTest extends TestCase
         $this->assertTrue($result->isFailed());
     }
 
+    public function testAlphaDash()
+    {
+        $validationRules = [
+            'username' => 'alpha_dash',
+        ];
+        $dataToValidate = [
+            'username' => 'john_doe-123',
+        ];
+
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertFalse($result->isFailed());
+
+        $dataToValidate['username'] = 'john@doe';
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertTrue($result->isFailed());
+    }
+
+    public function testAfter()
+    {
+        $validationRules = [
+            'start_date' => 'after:2023-01-01',
+        ];
+        $dataToValidate = [
+            'start_date' => '2023-01-02',
+        ];
+
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertFalse($result->isFailed());
+
+        $dataToValidate['start_date'] = '2022-12-31';
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertTrue($result->isFailed());
+    }
+
+    public function testBefore()
+    {
+        $validationRules = [
+            'end_date' => 'before:2023-01-01',
+        ];
+        $dataToValidate = [
+            'end_date' => '2022-12-31',
+        ];
+
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertFalse($result->isFailed());
+
+        $dataToValidate['end_date'] = '2023-01-02';
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertTrue($result->isFailed());
+    }
+
+    public function testActiveUrl()
+    {
+        $validationRules = [
+            'website' => 'active_url',
+        ];
+        $dataToValidate = [
+            'website' => 'https://www.google.com',
+        ];
+
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertFalse($result->isFailed());
+
+        $dataToValidate['website'] = 'https://invalid-url.com';
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertTrue($result->isFailed());
+    }
+
+    public function testAscii()
+    {
+        $validationRules = [
+            'text' => 'ascii',
+        ];
+        $dataToValidate = [
+            'text' => 'Hello World!',
+        ];
+
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertFalse($result->isFailed());
+
+        $dataToValidate['text'] = 'こんにちは世界';
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertTrue($result->isFailed());
+    }
+
+    public function testDateEquals()
+    {
+        $validationRules = [
+            'event_date' => 'date_equals:2023-01-01',
+        ];
+        $dataToValidate = [
+            'event_date' => '2023-01-01',
+        ];
+
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertFalse($result->isFailed());
+
+        $dataToValidate['event_date'] = '2023-01-02';
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertTrue($result->isFailed());
+    }
+
+    public function testDistinct()
+    {
+        $validationRules = [
+            'items.*.id' => 'distinct',
+        ];
+        $dataToValidate = [
+            'items' => [
+                ['id' => 1],
+                ['id' => 2],
+                ['id' => 3],
+            ],
+        ];
+
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertFalse($result->isFailed());
+
+        $dataToValidate['items'][2]['id'] = 2;
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertTrue($result->isFailed());
+    }
+
+    public function testDistinctStrict()
+    {
+        $validationRules = [
+            'items.*.id' => 'distinct:strict',
+        ];
+        $dataToValidate = [
+            'items' => [
+                ['id' => 1],
+                ['id' => '1'],
+                ['id' => 2],
+            ],
+        ];
+
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertTrue($result->isFailed());
+
+        $dataToValidate['items'][1]['id'] = 3;
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertFalse($result->isFailed());
+    }
+
+    public function testDistinctIgnoreCase()
+    {
+        $validationRules = [
+            'items.*.name' => 'distinct:ignore_case',
+        ];
+        $dataToValidate = [
+            'items' => [
+                ['name' => 'Item1'],
+                ['name' => 'item1'],
+                ['name' => 'Item2'],
+            ],
+        ];
+
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertTrue($result->isFailed());
+
+        $dataToValidate['items'][1]['name'] = 'Item3';
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertFalse($result->isFailed());
+    }
+
     public function testMakeWithClassMethodRule()
     {
         $validationRules = [

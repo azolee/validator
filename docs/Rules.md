@@ -24,10 +24,6 @@ This document describes the validation rules available in the `Azolee\Validator\
 - **Description**: Validates that the data is not null.
 - **Usage**: `not_null`
 
-### `not_equals_field`
-- **Description**: Validates that the data is not equal to the value of another field.
-- **Usage**: `not_equals_field:other_field`
-
 ### `email`
 - **Description**: Validates that the data is a valid email address.
 - **Usage**: `email`
@@ -92,4 +88,47 @@ This document describes the validation rules available in the `Azolee\Validator\
 - **Description**: Validates that the data is not empty.
 - **Usage**: `required`
 
-[<< Back to Readme](../Readme.md)
+### `alpha_dash`
+- **Description**: Validates that the data contains only alphabetic characters, numbers, dashes, and underscores.
+- **Usage**: `alpha_dash`
+
+### `after`
+- **Description**: Validates that the data is a date after a given date.
+- **Usage**: `after:date`
+
+### `before`
+- **Description**: Validates that the data is a date before a given date.
+- **Usage**: `before:date`
+
+### `active_url`
+- **Description**: Validates that the data is a valid URL and the domain has a DNS record.
+- **Usage**: `active_url`
+
+### `ascii`
+- **Description**: Validates that the data contains only ASCII characters.
+- **Usage**: `ascii`
+
+### `date_equals`
+- **Description**: Validates that the data is a date equal to a given date.
+- **Usage**: `date_equals:date`
+
+### `distinct`
+- **Description**: Validates that the field under validation does not have any duplicate values when validating arrays.
+- **Usage**: `distinct`
+- **Parameters**:
+    - `strict`: Use strict comparisons.
+    - `ignore_case`: Ignore capitalization differences.
+
+### Callable Rules
+
+Callable rules are custom validation rules defined as closures or callable functions. They should return a boolean value indicating whether the validation passed or failed.
+
+#### Example
+
+```php
+$validationRules = [
+    'field_name' => function ($data, $key, $dataToValidate) {
+        // Custom validation logic
+        return $data === 'expected_value';
+    },
+];
