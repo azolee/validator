@@ -52,7 +52,7 @@ class ValidatorTest extends TestCase
             'name' => 'John Doe',
         ];
 
-        Validator::make($validationRules, $dataToValidate, false);
+        Validator::config(['silent'=>false])->make($validationRules, $dataToValidate);
     }
 
     public function testMakeWithInvalidData()
@@ -66,7 +66,7 @@ class ValidatorTest extends TestCase
             'age' => 'thirty', // Invalid data
         ];
 
-        Validator::make($validationRules, $dataToValidate, false);
+        Validator::config(['silent'=>false])->make($validationRules, $dataToValidate);
     }
 
     public function testMakeWithSilentMode()

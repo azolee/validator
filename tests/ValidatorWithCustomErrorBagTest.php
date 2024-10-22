@@ -23,10 +23,11 @@ class ValidatorWithCustomErrorBagTest extends TestCase
             'numeric' => 'The :attribute is not a valid number.',
         ]);
 
-        $result = Validator::make(
+        $result = Validator::config([
+            'errorBag' => $validationErrorBag,
+        ])->make(
             $validationRules,
             $dataToValidate,
-            validationErrorBag: $validationErrorBag
         );
 
         $this->assertTrue($result->isFailed());
