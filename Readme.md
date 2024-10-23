@@ -1,4 +1,6 @@
-# The Laravel-like data validator
+# The Laravel-like data validator for PHP
+
+[![Latest Version](https://img.shields.io/packagist/v/azolee/validator.svg?style=flat-square)](https://packagist.org/packages/azolee/validator)
 
 The Laravel-like Validator is a PHP validation library designed to help you validate data structures with ease. It supports various validation rules, custom rules, and nested data validation.
 
@@ -24,19 +26,27 @@ use Azolee\Validator\Validator;
 $validationRules = [
     'user.name' => 'string',
     'user.age' => 'numeric',
-    'user.is_active' => 'boolean',
+    'user.email' => ['email', 'not_null'],
+    'user.website' => ['url'],
+    'user.password' => ['string', 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/'],
+    'user.password_confirmation' => ['same:user.password'],
+    'user.is_active' => ['boolean', 'not_null'],
     'address' => 'array',
     'address.city' => 'string',
-    'address.street' => ['string', 'not_equals_field:address.city', 'not_equals_field:address.street2', 'not_equals_field:address.no'],
+    'address.street' => ['string', 'different:address.city', 'different:address.street2', 'different:address.no'],
     'address.street2' => 'not_null',
     'address.no' => 'string',
     'images.*.url' => 'string',
-    'images.*.role' => 'string',
+    'images.*.role' => ['string', 'in:profile_photo,album_photo'],
 ];
 
 $dataToValidate = [
     'user' => [
         'name' => 'John Doe',
+        'email' => 'user@email.com',
+        'password' => 'secret',
+        'password_confirmation' => 'secret',
+        'website' => 'https://github.com',
         'age' => 30,
         'is_active' => true,
     ],
@@ -115,7 +125,7 @@ try {
         'name' => 'John Doe',
     ];
 
-    Validator::make($validationRules, $dataToValidate, false);
+    Validator::config(['silent' => false])->make($validationRules, $dataToValidate);
 } catch (InvalidValidationRule $e) {
     echo "Caught an InvalidValidationRule exception: " . $e->getMessage();
 } catch (ValidationException $e) {
