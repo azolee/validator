@@ -28,7 +28,7 @@ $validationRules = [
     'user.age' => 'numeric',
     'user.email' => ['email', 'not_null'],
     'user.website' => ['url'],
-    'user.password' => ['string', 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/'],
+    'user.password' => ['password:ulds', 'min:8'],
     'user.password_confirmation' => ['same:user.password'],
     'user.is_active' => ['boolean', 'not_null'],
     'address' => 'array',
@@ -44,7 +44,7 @@ $dataToValidate = [
     'user' => [
         'name' => 'John Doe',
         'email' => 'user@email.com',
-        'password' => 'secret',
+        'password' => 'SecretPasswd#1',
         'password_confirmation' => 'secret',
         'website' => 'https://github.com',
         'age' => 30,
