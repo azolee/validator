@@ -1,6 +1,6 @@
 <?php
 
-include_once __DIR__ . '/../vendor/autoload.php';
+namespace Tests;
 
 use Azolee\Validator\Exceptions\InvalidValidationRule;
 use Azolee\Validator\Exceptions\ValidationException;
@@ -802,5 +802,43 @@ class ValidatorTest extends TestCase
         $result = Validator::make($validationRules, $dataToValidate);
 
         $this->assertTrue($result->isFailed());
+    }
+
+    public function testPasswordRule()
+    {
+        $validationRules = [
+            'password' => ['password:ulds', 'min:8'],
+        ];
+        $dataToValidate = [
+            'password' => 'StrongPass1!',
+        ];
+
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertFalse($result->isFailed());
+
+        $validationRules['password'] = 'password';
+        $dataToValidate['password'] = 'weekpassword';
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertFalse($result->isFailed());
+
+        $validationRules['password'] = 'password:ulds';
+        $dataToValidate['password'] = 'weekpassword';
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertTrue($result->isFailed());
+
+        $validationRules['password'] = 'password:ulds';
+        $dataToValidate['password'] = 'weekpassword';
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertTrue($result->isFailed());
+
+        $validationRules['password'] = ['password:ulds', 'min:12'];
+        $dataToValidate['password'] = 'ShortPass1!';
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertTrue($result->isFailed());
+
+        $validationRules['password'] = ['password:ulds', 'min:11'];
+        $dataToValidate['password'] = 'Short.Pass1';
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertFalse($result->isFailed());
     }
 }

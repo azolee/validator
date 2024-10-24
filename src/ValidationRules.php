@@ -104,7 +104,16 @@ class ValidationRules
      */
     public static function min(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
-        return is_numeric($data) && $data >= $value;
+        if (is_numeric($data)) {
+            return $data >= $value;
+        }
+        if (is_string($data)) {
+            return strlen($data) >= $value;
+        }
+        if (is_array($data)) {
+            return count($data) >= $value;
+        }
+        return false;
     }
 
     /**
@@ -116,7 +125,16 @@ class ValidationRules
      */
     public static function max(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
-        return is_numeric($data) && $data <= $value;
+        if (is_numeric($data)) {
+            return $data <= $value;
+        }
+        if (is_string($data)) {
+            return strlen($data) <= $value;
+        }
+        if (is_array($data)) {
+            return count($data) <= $value;
+        }
+        return false;
     }
 
     /**
@@ -404,5 +422,46 @@ class ValidationRules
             }
         }
         return false;
+    }
+
+    /**
+     * @param mixed $data
+     * @param string|null $key
+     * @param mixed|null $value
+     * @param array $dataToValidate
+     * @return bool
+     */
+    public static function password(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    {
+        $config = [
+            'require_uppercase' => false,
+            'require_lowercase' => false,
+            'require_digit' => false,
+            'require_special' => false,
+        ];
+
+        if ($value) {
+            $config['require_uppercase'] = str_contains($value, 'u');
+            $config['require_lowercase'] = str_contains($value, 'l');
+            $config['require_digit'] = str_contains($value, 'd');
+            $config['require_special'] = str_contains($value, 's');
+        }
+
+        $pattern = '/^';
+        if ($config['require_lowercase']) {
+            $pattern .= '(?=.*[a-z])';
+        }
+        if ($config['require_uppercase']) {
+            $pattern .= '(?=.*[A-Z])';
+        }
+        if ($config['require_digit']) {
+            $pattern .= '(?=.*\d)';
+        }
+        if ($config['require_special']) {
+            $pattern .= '(?=.*[.,~@$!%*?&])';
+        }
+        $pattern .= '.+$/';
+
+        return preg_match($pattern, $data) === 1;
     }
 }

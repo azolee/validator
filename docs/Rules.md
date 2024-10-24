@@ -33,11 +33,11 @@ This document describes the validation rules available in the `Azolee\Validator\
 - **Usage**: `url`
 
 ### `min`
-- **Description**: Validates that the data is greater than or equal to a minimum value.
+- **Description**: Validates that the data is greater than or equal to a minimum value. Supports numeric, string, and array data types.
 - **Usage**: `min:value`
 
 ### `max`
-- **Description**: Validates that the data is less than or equal to a maximum value.
+- **Description**: Validates that the data is less than or equal to a maximum value. Supports numeric, string, and array data types.
 - **Usage**: `max:value`
 
 ### `in`
@@ -116,8 +116,21 @@ This document describes the validation rules available in the `Azolee\Validator\
 - **Description**: Validates that the field under validation does not have any duplicate values when validating arrays.
 - **Usage**: `distinct`
 - **Parameters**:
-    - `strict`: Use strict comparisons.
-    - `ignore_case`: Ignore capitalization differences.
+  - `strict`: Use strict comparisons.
+  - `ignore_case`: Ignore capitalization differences.
+
+### `date_format`
+- **Description**: Validates that the data matches one of the given date formats.
+- **Usage**: `date_format:format1,format2,...`
+
+### `password`
+- **Description**: Validates that the data meets the password strength requirements.
+- **Usage**: `password:ulds`
+- **Parameters**:
+  - `u`: Require at least one uppercase letter.
+  - `l`: Require at least one lowercase letter.
+  - `d`: Require at least one digit.
+  - `s`: Require at least one special character: `.,~@$!%*?&`.
 
 ### Callable Rules
 
