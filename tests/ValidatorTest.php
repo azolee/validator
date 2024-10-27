@@ -452,7 +452,35 @@ class ValidatorTest extends TestCase
         $result = Validator::make($validationRules, $dataToValidate);
         $this->assertFalse($result->isFailed());
 
-        $dataToValidate['age'] = 16;
+        $dataToValidate['age'] = 17;
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertTrue($result->isFailed());
+
+        $validationRules = [
+            'password' => 'min:10',
+        ];
+        $dataToValidate = [
+            'password' => 'maxuserpassword',
+        ];
+
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertFalse($result->isFailed());
+
+
+        $validationRules = [
+            'images' => 'min:3',
+        ];
+        $dataToValidate = [
+            'images' => ['image1.jpg', 'image2.jpg'],
+        ];
+
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertTrue($result->isFailed());
+
+        $dataToValidate = [
+            'images' => true,
+        ];
+
         $result = Validator::make($validationRules, $dataToValidate);
         $this->assertTrue($result->isFailed());
     }
@@ -470,6 +498,34 @@ class ValidatorTest extends TestCase
         $this->assertFalse($result->isFailed());
 
         $dataToValidate['age'] = 70;
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertTrue($result->isFailed());
+
+        $validationRules = [
+            'password' => 'max:20',
+        ];
+        $dataToValidate = [
+            'password' => 'maxuserpassword',
+        ];
+
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertFalse($result->isFailed());
+
+
+        $validationRules = [
+            'images' => 'max:2',
+        ];
+        $dataToValidate = [
+            'images' => ['image1.jpg', 'image2.jpg', 'image3.jpg'],
+        ];
+
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertTrue($result->isFailed());
+
+        $dataToValidate = [
+            'images' => true,
+        ];
+
         $result = Validator::make($validationRules, $dataToValidate);
         $this->assertTrue($result->isFailed());
     }
@@ -840,5 +896,82 @@ class ValidatorTest extends TestCase
         $dataToValidate['password'] = 'Short.Pass1';
         $result = Validator::make($validationRules, $dataToValidate);
         $this->assertFalse($result->isFailed());
+    }
+
+    public function testContains()
+    {
+        $validationRules = [
+            'description' => 'contains:example',
+        ];
+        $dataToValidate = [
+            'description' => 'This is an example description.',
+        ];
+
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertFalse($result->isFailed());
+
+        $dataToValidate['description'] = 'This is a test description.';
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertTrue($result->isFailed());
+    }
+
+    public function testDateFormat()
+    {
+        $validationRules = [
+            'event_date' => 'date_format:Y-m-d',
+        ];
+        $dataToValidate = [
+            'event_date' => '2023-01-01',
+        ];
+
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertFalse($result->isFailed());
+
+        $dataToValidate['event_date'] = '01-01-2023';
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertTrue($result->isFailed());
+    }
+
+    public function testSetFailedOnInvalidRuleType()
+    {
+        $validationRules = [
+            'field' => 123, // Invalid rule type
+        ];
+        $dataToValidate = [
+            'field' => 'value',
+        ];
+
+        $validator = Validator::config(['silent' => true]);
+        $result = $validator->make($validationRules, $dataToValidate);
+
+        $this->assertTrue($result->isFailed());
+        $this->assertEquals('invalid_rule', $result->getFailedRules()[0]['rule']);
+    }
+
+    public function testSetFailedOnException()
+    {
+        $validationRules = [
+            'field' => 'invalid_rule', // This should trigger an exception
+        ];
+        $dataToValidate = [
+            'field' => 'value',
+        ];
+
+        $validator = Validator::config(['silent' => true]);
+        $result = $validator->make($validationRules, $dataToValidate);
+
+        $this->assertTrue($result->isFailed());
+        $this->assertEquals('', $result->getFailedRules()[0]['rule']);
+        $this->assertEquals('', $result->getFailedRules()[0]['key']);
+        $this->assertEquals($dataToValidate, $result->getFailedRules()[0]['data']);
+        $this->assertNotEmpty($result->getFailedRules()[0]['message']);
+    }
+
+    public function testBadMethodCallException()
+    {
+        $this->expectException(\BadMethodCallException::class);
+        $this->expectExceptionMessage('Method nonExistentMethod does not exist.');
+
+        Validator::nonExistentMethod();
     }
 }

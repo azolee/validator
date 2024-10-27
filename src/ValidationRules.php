@@ -294,8 +294,7 @@ class ValidationRules
      */
     public static function contains(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
-        $values = explode(',', $value);
-        return in_array($data, $values);
+        return str_contains($data, $value);
     }
 
     /**
