@@ -24,12 +24,8 @@ class ClassHelper
             return new ReflectionMethod($callable[0], $callable[1]);
         }
 
-        if (is_string($callable)) {
-            if (function_exists($callable)) {
-                return new ReflectionFunction($callable);
-            }
-
-            return new ReflectionMethod($callable);
+        if (is_string($callable) && function_exists($callable)) {
+            return new ReflectionFunction($callable);
         }
 
         if (is_object($callable) && method_exists($callable, '__invoke')) {
