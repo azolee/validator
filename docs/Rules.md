@@ -132,6 +132,10 @@ This document describes the validation rules available in the `Azolee\Validator\
   - `d`: Require at least one digit.
   - `s`: Require at least one special character: `.,~@$!%*?&`.
 
+### `contains`
+- **Description**: Validates that the data contains the specified substring.
+- **Usage**: `contains:substring`
+
 ### Callable Rules
 
 Callable rules are custom validation rules defined as closures or callable functions. They should return a boolean value indicating whether the validation passed or failed.

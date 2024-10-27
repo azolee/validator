@@ -50,20 +50,20 @@ class ImageValidator
      */
     public function validate($data): bool
     {
-        if (!file_exists($data['tmp_name'])) {
+        if (!file_exists($data)) {
             throw new FileNotFoundException("File not uploaded correctly.");
         }
 
-        if (($this->allowedMimeTypes ?? false) && !in_array(mime_content_type($data['tmp_name']), $this->allowedMimeTypes)) {
+        if (($this->allowedMimeTypes ?? false) && !in_array(mime_content_type($data), $this->allowedMimeTypes)) {
             throw new InvalidMimeTypeException("Invalid MIME type.");
         }
 
-        $size = filesize($data['tmp_name']);
+        $size = filesize($data);
         if (($this->maxSize ?? false) && $size > $this->maxSize) {
             throw new FileSizeExceededException("File size exceeds the maximum limit.");
         }
 
-        [$width, $height] = getimagesize($data['tmp_name']);
+        [$width, $height] = getimagesize($data);
         $ratio = $width / $height;
 
         if (($this->minRatio ?? false) && ($ratio < $this->minRatio)) {

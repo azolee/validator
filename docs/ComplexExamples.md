@@ -229,4 +229,42 @@ if ($result->isFailed()) {
 }
 ```
 
+### Example: `Validating Image Files`
+
+This code uses the `Validator` class with custom rules to validate image files.
+
+```php
+use Azolee\Validator\Validator;
+use Azolee\Validator\Rule;
+
+$dataToValidate = [
+    'images' => [
+        'tmp_name' => __DIR__ . '/images/valid_image.jpg',
+    ],
+];
+
+$validationRules = [
+    'images' => function ($data) {
+        return Rule::image(
+            $data,
+            allowedMimeTypes: ['image/jpeg', 'image/png'],
+            maxSize: 2 * 1024 * 1024, // 2MB
+            minRatio: 0.5,
+            maxRatio: 2.0,
+            minWidth: 100,
+            maxWidth: 1920,
+            minHeight: 100,
+            maxHeight: 1080
+        );
+    },
+];
+
+$result = Validator::make($validationRules, $dataToValidate);
+if ($result->isFailed()) {
+    echo "Image validation failed";
+} else {
+    echo "Image validation successful!";
+}
+```
+
 [<< Back to Readme](../Readme.md)

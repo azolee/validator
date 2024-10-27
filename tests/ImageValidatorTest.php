@@ -15,16 +15,12 @@ class ImageValidatorTest extends TestCase
     protected static function getDataToValidate($fileName)
     {
         return [
-            'images' => [
-                'tmp_name' => __DIR__ . '/images/' . $fileName,
-            ],
+            'images' => __DIR__ . '/images/' . $fileName,
         ];
     }
     public function testValidImage()
     {
-        $dataToValidate = [
-            'tmp_name' => __DIR__ . '/images/valid_image.jpg',
-        ];
+        $dataToValidate = __DIR__ . '/images/valid_image.jpg';
 
         $validator = new ImageValidator(
             allowedMimeTypes: ['image/jpeg', 'image/png'],
@@ -202,9 +198,7 @@ class ImageValidatorTest extends TestCase
         $this->expectException(InvalidImageRatioException::class);
         $this->expectExceptionMessage("Image ratio is too large.");
 
-        $dataToValidate = [
-            'tmp_name' => __DIR__ . '/images/valid_image.jpg',
-        ];
+        $dataToValidate = __DIR__ . '/images/valid_image.jpg';
 
         $validator = new ImageValidator(maxRatio: 0.9);
         $validator->validate($dataToValidate);
@@ -215,9 +209,7 @@ class ImageValidatorTest extends TestCase
         $this->expectException(InvalidImageWidthException::class);
         $this->expectExceptionMessage("Image width is too large.");
 
-        $dataToValidate = [
-            'tmp_name' => __DIR__ . '/images/valid_image.jpg',
-        ];
+        $dataToValidate = __DIR__ . '/images/valid_image.jpg';
 
         $validator = new ImageValidator(maxWidth: 400);
         $validator->validate($dataToValidate);
@@ -228,9 +220,7 @@ class ImageValidatorTest extends TestCase
         $this->expectException(InvalidImageHeightException::class);
         $this->expectExceptionMessage("Image height is too small.");
 
-        $dataToValidate = [
-            'tmp_name' => __DIR__ . '/images/valid_image.jpg',
-        ];
+        $dataToValidate = __DIR__ . '/images/valid_image.jpg';
 
         $validator = new ImageValidator(minHeight: 600);
         $validator->validate($dataToValidate);
