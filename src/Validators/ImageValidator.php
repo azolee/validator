@@ -11,34 +11,16 @@ use Azolee\Validator\Exceptions\InvalidImageHeightException;
 
 class ImageValidator
 {
-    protected array $allowedMimeTypes;
-    protected int $maxSize; // in bytes
-    protected float $minRatio;
-    protected float $maxRatio;
-    protected int $minWidth;
-    protected int $maxWidth;
-    protected int $minHeight;
-    protected int $maxHeight;
-
     public function __construct(
-        array $allowedMimeTypes = null,
-        int $maxSize = null,
-        float $minRatio = null,
-        float $maxRatio = null,
-        int $minWidth = null,
-        int $maxWidth = null,
-        int $minHeight = null,
-        int $maxHeight = null
-    ) {
-        $this->allowedMimeTypes = $allowedMimeTypes ?? ['image/jpeg', 'image/png', 'image/gif'];
-        $this->maxSize = $maxSize ?? 2 * 1024 * 1024; // 2MB
-        $this->minRatio = $minRatio ?? 0.5;
-        $this->maxRatio = $maxRatio ?? 2;
-        $this->minWidth = $minWidth ?? 100;
-        $this->maxWidth = $maxWidth ?? 1920;
-        $this->minHeight = $minHeight ?? 100;
-        $this->maxHeight = $maxHeight ?? 1080;
-    }
+        protected array $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif'],
+        protected int $maxSize = 2 * 1024 * 1024, // 2MB
+        protected float $minRatio = 0.5,
+        protected float $maxRatio = 2.0,
+        protected int $minWidth = 100,
+        protected int $maxWidth = 1920,
+        protected int $minHeight = 100,
+        protected int $maxHeight = 1080
+    ) {}
 
     /**
      * @throws FileNotFoundException

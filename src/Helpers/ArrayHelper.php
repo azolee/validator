@@ -34,4 +34,20 @@ class ArrayHelper
 
         return [['value' => $result, 'key' => rtrim($parentKey, '.'), 'type' => gettype($result)]];
     }
+
+    public static function transformStringToArray(string $input): array {
+        $result = [];
+        $elements = explode(',', $input);
+
+        foreach ($elements as $element) {
+            if (str_contains($element, ':')) {
+                list($key, $value) = explode(':', $element, 2);
+                $result[$key] = is_numeric($value) ? (int)$value : $value;
+            } else {
+                $result[] = $element;
+            }
+        }
+
+        return $result;
+    }
 }
