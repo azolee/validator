@@ -5,10 +5,10 @@ namespace Tests;
 use Azolee\Validator\Exceptions\InvalidImageHeightException;
 use Azolee\Validator\Exceptions\InvalidImageRatioException;
 use Azolee\Validator\Exceptions\InvalidImageWidthException;
+use Azolee\Validator\Rule;
 use Azolee\Validator\Validator;
 use Azolee\Validator\Validators\ImageValidator;
 use PHPUnit\Framework\TestCase;
-use Azolee\Validator\Rule;
 
 class ImageValidatorTest extends TestCase
 {
@@ -18,6 +18,7 @@ class ImageValidatorTest extends TestCase
             'images' => __DIR__ . '/images/' . $fileName,
         ];
     }
+
     public function testValidImage()
     {
         $dataToValidate = __DIR__ . '/images/valid_image.jpg';

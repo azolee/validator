@@ -3,6 +3,7 @@
 namespace Azolee\Validator;
 
 use Azolee\Validator\Helpers\ArrayHelper;
+use Azolee\Validator\Validators\Base64Validator;
 
 class ValidationRules
 {
@@ -218,10 +219,9 @@ class ValidationRules
      * @param array $dataToValidate
      * @return bool
      */
-    public static function same(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    public static function different(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
-        $fieldToCompare = ArrayHelper::parseNestedData($dataToValidate, $value)[0] ?? ['value' => null];
-        return $data === $fieldToCompare['value'];
+        return !static::same($data, $key, $value, $dataToValidate);
     }
 
     /**
@@ -231,9 +231,10 @@ class ValidationRules
      * @param array $dataToValidate
      * @return bool
      */
-    public static function different(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    public static function same(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
-        return !static::same($data, $key, $value, $dataToValidate);
+        $fieldToCompare = ArrayHelper::parseNestedData($dataToValidate, $value)[0] ?? ['value' => null];
+        return $data === $fieldToCompare['value'];
     }
 
     /**
@@ -462,5 +463,33 @@ class ValidationRules
         $pattern .= '.+$/';
 
         return preg_match($pattern, $data) === 1;
+    }
+
+    /**
+     * Validates that the data is a valid base64 string.
+     *
+     * @param mixed $data
+     * @param string|null $key
+     * @param mixed|null $value
+     * @param array $dataToValidate
+     * @return bool
+     */
+    public static function base64(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    {
+        return Base64Validator::validateString($data, $key, $value, $dataToValidate);
+    }
+
+    /**
+     * Validates that the data is a valid base64 encoded image.
+     *
+     * @param mixed $data
+     * @param string|null $key
+     * @param mixed|null $value
+     * @param array $dataToValidate
+     * @return bool
+     */
+    public static function base64_image(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    {
+        return Base64Validator::validateImage($data, $key, $value, $dataToValidate);
     }
 }

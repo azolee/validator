@@ -52,7 +52,7 @@ class ValidatorTest extends TestCase
             'name' => 'John Doe',
         ];
 
-        Validator::config(['silent'=>false])->make($validationRules, $dataToValidate);
+        Validator::config(['silent' => false])->make($validationRules, $dataToValidate);
     }
 
     public function testMakeWithInvalidData()
@@ -66,7 +66,7 @@ class ValidatorTest extends TestCase
             'age' => 'thirty', // Invalid data
         ];
 
-        Validator::config(['silent'=>false])->make($validationRules, $dataToValidate);
+        Validator::config(['silent' => false])->make($validationRules, $dataToValidate);
     }
 
     public function testMakeWithSilentMode()
@@ -973,5 +973,166 @@ class ValidatorTest extends TestCase
         $this->expectExceptionMessage('Method nonExistentMethod does not exist.');
 
         Validator::nonExistentMethod();
+    }
+
+    public function testValidSmallBase64String()
+    {
+        $validationRules = [
+            'data' => 'base64',
+        ];
+        $dataToValidate = [
+            'data' => base64_encode('small string'),
+        ];
+
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertFalse($result->isFailed());
+    }
+
+    public function testInvalidSmallBase64String()
+    {
+        $validationRules = [
+            'data' => 'base64',
+        ];
+        $dataToValidate = [
+            'data' => 'invalid_base64_string',
+        ];
+
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertTrue($result->isFailed());
+    }
+
+    public function testValidHugeBase64String()
+    {
+        $validationRules = [
+            'data' => 'base64',
+        ];
+        $dataToValidate = [
+            'data' => base64_encode(str_repeat('Abc', 333333) . "d"), // 1MB string
+        ];
+
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertFalse($result->isFailed());
+    }
+
+    public function testInvalidHugeBase64String()
+    {
+        $validationRules = [
+            'data' => 'base64',
+        ];
+        $dataToValidate = [
+            'data' => str_repeat('A-', 500000), // 1MB invalid base64 string
+        ];
+
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertTrue($result->isFailed());
+    }
+
+    public function testValidBase64EncodedImage()
+    {
+        $validationRules = [
+            'image' => 'base64',
+        ];
+        $imagePath = __DIR__ . '/images/valid_image.jpg';
+        $imageData = file_get_contents($imagePath);
+        $base64Image = base64_encode($imageData);
+
+        $dataToValidate = [
+            'image' => $base64Image,
+        ];
+
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertFalse($result->isFailed());
+    }
+
+    public function testInvalidBase64EncodedImage()
+    {
+        $validationRules = [
+            'image' => 'base64',
+        ];
+        $invalidBase64Image = 'invalid_base64_string';
+
+        $dataToValidate = [
+            'image' => $invalidBase64Image,
+        ];
+
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertTrue($result->isFailed());
+    }
+
+    public function testBase64WithChunkSize()
+    {
+        $validationRules = [
+            'data' => 'base64:4096', // Specify chunk size of 4096 bytes
+        ];
+        $imagePath = __DIR__ . '/images/valid_image.jpg';
+        $imageData = file_get_contents($imagePath);
+        $validBase64String = base64_encode($imageData);
+
+        $dataToValidate = [
+            'data' => $validBase64String,
+        ];
+
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertFalse($result->isFailed());
+
+        $validationRules = [
+            'data' => 'base64:chunk_size:4096', // Specify chunk size of 4096 bytes
+        ];
+
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertFalse($result->isFailed());
+
+        $dataToValidate['data'] = $validBase64String."_";
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertTrue($result->isFailed());
+    }
+
+    public function testValidBase64Image()
+    {
+        $validationRules = [
+            'image' => 'base64_image',
+        ];
+        $imagePath = __DIR__ . '/images/valid_image.jpg';
+        $imageData = file_get_contents($imagePath);
+        $base64Image = 'data:image/jpeg;base64,' . base64_encode($imageData);
+
+        $dataToValidate = [
+            'image' => $base64Image,
+        ];
+
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertFalse($result->isFailed());
+    }
+
+    public function testInvalidBase64Image()
+    {
+        $validationRules = [
+            'image' => 'base64_image',
+        ];
+        $invalidBase64Image = 'data:image/jpeg;base64,invalid_base64_string';
+
+        $dataToValidate = [
+            'image' => $invalidBase64Image,
+        ];
+
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertTrue($result->isFailed());
+    }
+
+    public function testMissingDataUrlScheme()
+    {
+        $validationRules = [
+            'image' => 'base64_image',
+        ];
+        $imagePath = __DIR__ . '/images/valid_image.jpg';
+        $imageData = file_get_contents($imagePath);
+        $base64Image = base64_encode($imageData); // Missing data URL scheme
+
+        $dataToValidate = [
+            'image' => $base64Image,
+        ];
+
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertTrue($result->isFailed());
     }
 }

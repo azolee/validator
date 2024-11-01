@@ -16,8 +16,7 @@ class Rule
         int $maxWidth = null,
         int $minHeight = null,
         int $maxHeight = null
-    ): bool
-    {
+    ): bool {
         $mimeTypes = is_array($mimeTypes) ? $mimeTypes : explode("|", $mimeTypes);
         $imageValidator = new ImageValidator(
             $mimeTypes,
