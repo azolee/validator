@@ -138,14 +138,17 @@ This document describes the validation rules available in the `Azolee\Validator\
 
 ### `base64`
 - **Description**: Validates that the data is a valid base64 encoded string.
-- **Usage**: `base64[:{chunk_size}]`
-- **Usage**: `base64[:chunk_size:{chunk_size}]`
+- **Usage**: `base64[:{chunk_size}]` or `base64[:chunk_size:{chunk_size}]`
 - **Parameters**:
   - `chunk_size`: The size of the chunks in which the data is split.
 
 ### `base64_image`
 - **Description**: Validates that the data is a valid base64 encoded image with a data URL scheme.
 - **Usage**: `base64_image`
+
+### `present`
+- **Description**: Validates that the field is present in the data.
+- **Usage**: `present`
 
 ### Callable Rules
 
