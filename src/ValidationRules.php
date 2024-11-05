@@ -492,4 +492,17 @@ class ValidationRules
     {
         return Base64Validator::validateImage($data, $key, $value, $dataToValidate);
     }
+
+    /**
+     * @param mixed $data
+     * @param string|null $key
+     * @param mixed|null $value
+     * @param array $dataToValidate
+     * @return bool
+     */
+    public static function present(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    {
+        $nestedData = ArrayHelper::parseNestedData($dataToValidate, $key);
+        return !empty($nestedData);
+    }
 }

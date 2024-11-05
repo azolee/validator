@@ -148,7 +148,11 @@ This code uses a custom validation rule defined as an object method to ensure th
 ```php
 $customRules = new CustomRules();
 $validationRules = [
-    'user.name' => [[$customRules, 'isNotJohnDoe'], 'string'],
+    'user.name' => [
+        'required',
+        'string',
+        [$customRules, 'isNotJohnDoe'],
+    ],
 ];
 
 $dataToValidate = [
@@ -267,4 +271,59 @@ if ($result->isFailed()) {
 }
 ```
 
+### Example: `Validating base64 strings`
+
+This code ensures that the `data` field contains a valid base64 encoded string. It first checks a valid base64 string and then an invalid one.
+
+```php
+$validationRules = [
+    'data' => 'base64',
+];
+$dataToValidate = [
+    'data' => base64_encode('valid data'),
+];
+
+$result = Validator::make($validationRules, $dataToValidate);
+if ($result->isFailed()) {
+    echo "Validation failed";
+} else {
+    echo "Validation successful!";
+}
+
+$dataToValidate['data'] = 'invalid_base64_string';
+$result = Validator::make($validationRules, $dataToValidate);
+if ($result->isFailed()) {
+    echo "Validation failed";
+} else {
+    echo "Validation successful!";
+}
+```
+
+### Example: `Validating Base64 Image`
+
+This code ensures that the image field contains a valid base64 encoded image. It first checks a valid base64 encoded image and then an invalid one.
+
+```php
+$validationRules = [
+    'image' => 'base64_image',
+];
+$dataToValidate = [
+    'image' => 'data:image/jpeg;base64,' . base64_encode(file_get_contents('path/to/valid/image.jpg')),
+];
+
+$result = Validator::make($validationRules, $dataToValidate);
+if ($result->isFailed()) {
+    echo "Validation failed";
+} else {
+    echo "Validation successful!";
+}
+
+$dataToValidate['image'] = 'invalid_base64_image_string';
+$result = Validator::make($validationRules, $dataToValidate);
+if ($result->isFailed()) {
+    echo "Validation failed";
+} else {
+    echo "Validation successful!";
+}
+```
 [<< Back to Readme](../Readme.md)

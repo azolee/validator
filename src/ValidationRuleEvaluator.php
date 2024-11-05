@@ -62,6 +62,10 @@ class ValidationRuleEvaluator
 
         $dataSet = ArrayHelper::parseNestedData($dataToValidate, $key);
 
+        if (empty($dataSet)) {
+            return $validationRules::$method(null, $key, $additionalAttribute, $dataToValidate);
+        }
+
         foreach ($dataSet as $data) {
             $result = $validationRules::$method($data['value'], $data['key'], $additionalAttribute, $dataToValidate);
             if ($result === false) {
