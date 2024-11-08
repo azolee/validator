@@ -10,28 +10,21 @@ class ValidatorWithCustomErrorBagTest extends TestCase
 {
     public function testValidatorWithCustomErrorBag()
     {
-        $validationRules = [
-            'username' => 'string',
-            'age' => 'numeric',
-        ];
-        $dataToValidate = [
-            'username' => 'JohnDoe',
-            'age' => 'thirty', // Invalid data
-        ];
-
-        $validationErrorBag = ErrorBags::getCustomErrorBag([
+        $errorBag = ErrorBags::getCustomErrorBag([
             'numeric' => 'The :attribute is not a valid number.',
         ]);
 
-        $result = Validator::config([
-            'errorBag' => $validationErrorBag,
-        ])->make(
-            $validationRules,
-            $dataToValidate,
-        );
+        $validationRules = [
+            'age' => 'numeric',
+        ];
+        $dataToValidate = [
+            'age' => 'thirty', // Invalid data
+        ];
+
+        $result = Validator::config(['errorBag' => $errorBag])->make($validationRules, $dataToValidate);
 
         $this->assertTrue($result->isFailed());
-        $this->assertEquals('The age is not a valid number.', $result->getErrorsForFailure());
+        $this->assertEquals('The age is not a valid number.', $result->getFailedRules()[0]['message']);
     }
 
     public function testValidatorWithValidData()

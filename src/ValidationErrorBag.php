@@ -13,20 +13,19 @@ class ValidationErrorBag implements ValidationErrorBagInterface
         'string' => 'The :attribute must be a string.',
         'boolean' => 'The :attribute must be a boolean.',
         'not_null' => 'The :attribute must not be null.',
-        'not_equals_field' => 'The :attribute does not equal :key.',
         'array' => 'The :attribute must be an array.',
         'email' => 'The :attribute must be a valid email address.',
         'url' => 'The :attribute must be a valid URL.',
-        'min' => 'The :attribute must be at least :value.',
-        'max' => 'The :attribute must not be greater than :value.',
-        'in' => 'The :attribute must be one of the following: :value.',
+        'min' => 'The :attribute size must be at least :value.',
+        'max' => 'The :attribute size must not be greater than :value.',
+        'in' => 'The :attribute must be one of the following: :values.',
         'date' => 'The :attribute must be a valid date.',
         'alpha' => 'The :attribute may only contain letters.',
         'alpha_num' => 'The :attribute may only contain letters and numbers.',
-        'digits' => 'The :attribute must be :value digits.',
-        'digits_between' => 'The :attribute must be between :min and :max digits.',
-        'different' => 'The :attribute and :key must be different.',
-        'same' => 'The :attribute and :key must match.',
+        'digits' => 'The :attribute must be digits.',
+        'digits_between' => 'The :attribute must be between :value and :value1 digits.',
+        'different' => 'The :attribute and :value must be different.',
+        'same' => 'The :attribute and :value must match.',
         'ip' => 'The :attribute must be a valid IP address.',
         'json' => 'The :attribute must be a valid JSON string.',
         'regex' => 'The :attribute format is invalid.',
@@ -49,8 +48,8 @@ class ValidationErrorBag implements ValidationErrorBagInterface
     /**
      * @return array
      * */
-    public function getErrorFor(array|string $rules, string $attribute): string
+    public function getErrorFor(array|string $rules, string $attribute, array $extraParams = []): string
     {
-        return ErrorsHelper::getError($this->list, $rules, $attribute);
+        return ErrorsHelper::getError($this->list, $rules, $attribute, $extraParams);
     }
 }

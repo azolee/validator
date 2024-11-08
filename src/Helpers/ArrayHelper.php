@@ -35,7 +35,8 @@ class ArrayHelper
         return [['value' => $result, 'key' => rtrim($parentKey, '.'), 'type' => gettype($result)]];
     }
 
-    public static function transformStringToArray(string $input): array {
+    public static function transformStringToArray(string $input): array
+    {
         $result = [];
         $elements = explode(',', $input);
 
@@ -48,6 +49,19 @@ class ArrayHelper
             }
         }
 
+        return $result;
+    }
+
+    public static function prependStringToNumericKeys(array $array, string $prefix): array
+    {
+        $result = [];
+        foreach ($array as $key => $value) {
+            if (is_numeric($key)) {
+                $result[$prefix . ($key > 0 ? $key : "")] = $value;
+            } else {
+                $result[$key] = $value;
+            }
+        }
         return $result;
     }
 }

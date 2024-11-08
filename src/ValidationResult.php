@@ -3,6 +3,7 @@
 namespace Azolee\Validator;
 
 use Azolee\Validator\Contracts\ValidationErrorBagInterface;
+use Azolee\Validator\Helpers\ArrayHelper;
 use Azolee\Validator\Helpers\ClassHelper;
 
 class ValidationResult
@@ -20,16 +21,35 @@ class ValidationResult
      * @param string $key
      * @param mixed $dataToValidate
      * @param string|null $message
+     * @param array $extraParams
      * @return void
      */
-    public function setFailed(string $rule, string $key, mixed $dataToValidate, ?string $message = null): void
+    public function setFailed(string $rule, string $key, mixed $dataToValidate, ?string $message = null, array $extraParams = []): void
     {
-        $this->failedRules[] = [
-                'rule' => ClassHelper::isCallable($rule) ? ValidationRules::CUSTOM_RULE : $rule,
-                'key' => $key,
-                'data' => $dataToValidate,
-                'message' => $message ?? $this->validationError->getErrorFor($rule, $key),
-            ];
+        if (ClassHelper::isCallable($rule)) {
+            $rule = ValidationRules::CUSTOM_RULE;
+        }
+        if(str_contains($rule, ':')) {
+            $ruleParts = explode(':', $rule, 2);
+            $rule = array_shift($ruleParts);
+            $values = ArrayHelper::prependStringToNumericKeys(
+                    ArrayHelper::transformStringToArray(join(',', $ruleParts)),
+                    'value'
+                );
+            $extraParams = array_merge($values, $extraParams);
+        }
+
+        $failure = [
+            'rule' => $rule,
+            'key' => $key,
+            'data' => $dataToValidate,
+            'message' => $message ?? $this->validationError->getErrorFor($rule, $key, $extraParams),
+            'extraParams' => $extraParams,
+        ];
+
+        if (!in_array($failure, $this->failedRules)) {
+            $this->failedRules[] = $failure;
+        }
     }
 
     /**

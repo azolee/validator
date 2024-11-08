@@ -41,7 +41,7 @@ class CustomValidationErrorBagTest extends TestCase
     public function testGetErrorForRuleWithAdditionalAttribute()
     {
         $errorBag = ErrorBags::getCustomErrorBag([
-            'not_equals_field' => 'The :attribute does not equal :key.',
+            'not_equals_field' => 'The :attribute does not equal :value.',
         ]);
 
         $error = $errorBag->getErrorFor('not_equals_field:password', 'confirm_password');
