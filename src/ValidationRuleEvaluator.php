@@ -51,9 +51,11 @@ class ValidationRuleEvaluator
         $validationRules = new ValidationRules();
         $method = $rule;
         $additionalAttribute = null;
+        $extraParams = [];
 
         if (str_contains($rule, ':')) {
             [$method, $additionalAttribute] = explode(':', $rule, 2);
+            $extraParams = explode(',', $additionalAttribute);
         }
 
         if (!method_exists($validationRules, $method)) {
@@ -69,6 +71,7 @@ class ValidationRuleEvaluator
         foreach ($dataSet as $data) {
             $result = $validationRules::$method($data['value'], $data['key'], $additionalAttribute, $dataToValidate);
             if ($result === false) {
+                $this->errorManager->setFailed($method, $key, $dataToValidate, null, $extraParams);
                 return false;
             }
         }

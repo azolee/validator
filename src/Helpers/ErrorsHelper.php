@@ -4,7 +4,8 @@ namespace Azolee\Validator\Helpers;
 
 class ErrorsHelper
 {
-    public static function getError(array $list, array|string $rules, string $attribute): string
+// src/Helpers/ErrorsHelper.php
+    public static function getError(array $list, array|string $rules, string $attribute, array $extraParams = []): string
     {
         $errors = [];
         if (!is_array($rules)) {
@@ -12,13 +13,17 @@ class ErrorsHelper
         }
 
         foreach ($rules as $rule) {
-            $additionalAttribute = "";
             if (str_contains($rule, ':')) {
-                [$rule, $additionalAttribute] = explode(':', $rule, 2);
+                list($rule, $value) = explode(':', $rule, 2);
+                $extraParams['value'] = $value;
             }
 
             $error = str_ireplace(':attribute', $attribute, $list[$rule] ?? "The $attribute is invalid.");
-            $errors[] = str_ireplace(':key', $additionalAttribute, $error);
+            $extraParams = array_reverse($extraParams);
+            foreach ($extraParams as $key => $value) {
+                $error = str_ireplace(":$key", $value, $error);
+            }
+            $errors[] = $error;
         }
         return join(", ", $errors);
     }

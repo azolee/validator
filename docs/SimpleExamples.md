@@ -1,4 +1,4 @@
-## Tartalomjegyzék
+## Table of Contents
 
 1. [Alpha](#example-alpha)
 2. [Active URL](#example-active-url)
