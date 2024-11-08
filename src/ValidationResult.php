@@ -47,7 +47,8 @@ class ValidationResult
             'extraParams' => $extraParams,
         ];
 
-        if (!in_array($failure, $this->failedRules)) {
+        $failedRules = array_column($this->failedRules, 'rule');
+        if (!in_array($failure['rule'], $failedRules)) {
             $this->failedRules[] = $failure;
         }
     }
