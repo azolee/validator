@@ -71,7 +71,7 @@ class ValidationRuleEvaluator
         foreach ($dataSet as $data) {
             $result = $validationRules::$method($data['value'], $data['key'], $additionalAttribute, $dataToValidate);
             if ($result === false) {
-                $this->errorManager->setFailed($method, $key, $dataToValidate, null, $extraParams);
+                $this->errorManager->setFailed($rule, $key, $dataToValidate, null, $extraParams);
                 return false;
             }
         }
