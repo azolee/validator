@@ -74,12 +74,20 @@ class ValidationResult
      */
     public function getErrorsForFailure(): string
     {
+        return join(", ", $this->getErrorsForFields());
+    }
+
+    /**
+     * @return array
+     */
+    public function getErrorsForFields(): array
+    {
         $errors = [];
 
         foreach ($this->failedRules as $failedRule) {
-            $errors[] = $failedRule['message'] ?? $this->validationError->getErrorFor($failedRule['rule'], $failedRule['key']);
+            $errors[$failedRule['key']] = $failedRule['message'] ?? $this->validationError->getErrorFor($failedRule['rule'], $failedRule['key']);
         }
 
-        return join(", ", $errors);
+        return $errors;
     }
 }
