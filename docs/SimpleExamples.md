@@ -867,4 +867,23 @@ if ($result->isFailed()) {
     echo "Validation successful!";
 }
 ```
+
+### Example: `charset`
+
+The `charset` rule validates that a string is valid in the specified charset.
+
+**Usage:**
+
+```php
+$validationRules = [
+    'text' => 'charset:UTF-8',
+];
+$dataToValidate = [
+    'text' => 'Valid UTF-8 string',
+];
+
+$result = Validator::make($validationRules, $dataToValidate);
+```
+If the string is not valid in the specified charset, the validation will fail.
+
 [<< Back to Readme](../Readme.md)

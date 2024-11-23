@@ -43,6 +43,7 @@ class ValidationErrorBag implements ValidationErrorBagInterface
         'base64' => 'The :attribute must be a valid base64 string.',
         'base64_image' => 'The :attribute must be a valid base64 encoded image.',
         'present' => 'The :attribute field must be present.',
+        'charset' => 'The :attribute is not valid :value charset.',
     ];
 
     /**
