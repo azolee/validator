@@ -150,6 +150,12 @@ This document describes the validation rules available in the `Azolee\Validator\
 - **Description**: Validates that the field is present in the data.
 - **Usage**: `present`
 
+### `charset`
+- **Description**: Validates that the data is a valid string in the specified charset.
+- **Usage**: charset:charset
+- **Parameters**:
+  - `charset`: The character set to validate against (e.g., UTF-8, ISO-8859-1).
+
 ### Callable Rules
 
 Callable rules are custom validation rules defined as closures or callable functions. They should return a boolean value indicating whether the validation passed or failed.

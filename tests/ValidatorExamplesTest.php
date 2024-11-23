@@ -102,4 +102,28 @@ class ValidatorExamplesTest extends TestCase
 
         Validator::config(['silent' => false])->make($validationRules, $dataToValidate);
     }
+
+    public function testValidatorWithCharsetRule()
+    {
+        $validationRules = [
+            'note' => 'charset:UTF-8',
+        ];
+        $dataToValidate = [
+            'note' => 'Valid UTF-8 string',
+        ];
+
+        $result = Validator::make($validationRules, $dataToValidate);
+
+        $this->assertFalse($result->isFailed());
+
+        $dataToValidate['note'] = "\xC3\x28"; // Invalid UTF-8 string
+        $result = Validator::make($validationRules, $dataToValidate);
+
+        $this->assertTrue($result->isFailed());
+        $errors = $result->getFailedRules();
+        $this->assertEquals(
+                'The note is not valid UTF-8 charset.',
+                $errors[0]['message']
+            );
+    }
 }

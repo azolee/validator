@@ -505,4 +505,20 @@ class ValidationRules
         $nestedData = ArrayHelper::parseNestedData($dataToValidate, $key);
         return !empty($nestedData);
     }
+
+    /**
+     * @param mixed $data
+     * @param string|null $key
+     * @param mixed|null $value
+     * @param array $dataToValidate
+     * @return bool
+     */
+    public static function charset(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    {
+        if (!in_array($value, mb_list_encodings(), true)) {
+            return false;
+        }
+
+        return mb_check_encoding($data, $value);
+    }
 }
