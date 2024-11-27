@@ -22,6 +22,8 @@
 20. [Base64 Image](#example-base64-image)
 21. [Present](#example-present)
 22. [Different](#example-different)
+23. [Charset](#example-charset)
+23. [UUID](#example-uuid)
 
 
 
@@ -883,7 +885,37 @@ $dataToValidate = [
 ];
 
 $result = Validator::make($validationRules, $dataToValidate);
+if ($result->isFailed()) {
+    echo "Validation failed";
+} else {
+    echo "Validation successful!";
+}
 ```
+
 If the string is not valid in the specified charset, the validation will fail.
+
+
+### Example: `UUID`
+
+The `UUID` rule validates that the data is a valid UUID.
+
+**Usage:**
+
+```php
+$validationRules = [
+    'uuid' => 'uuid',
+];
+$dataToValidate = [
+    'uuid' => '123e4567-e89b-12d3-a456-426614174000',
+];
+
+$result = Validator::make($validationRules, $dataToValidate);
+if ($result->isFailed()) {
+    echo "Validation failed";
+} else {
+    echo "Validation successful!";
+}
+```
+
 
 [<< Back to Readme](../Readme.md)
