@@ -156,6 +156,11 @@ This document describes the validation rules available in the `Azolee\Validator\
 - **Parameters**:
   - `charset`: The character set to validate against (e.g., UTF-8, ISO-8859-1).
 
+### `uuid`
+- **Description**: Validates that the data is a valid UUID.
+- **Usage**: `uuid`
+- **Parameters**: None
+
 ### Callable Rules
 
 Callable rules are custom validation rules defined as closures or callable functions. They should return a boolean value indicating whether the validation passed or failed.

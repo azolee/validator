@@ -1135,4 +1135,22 @@ class ValidatorTest extends TestCase
         $result = Validator::make($validationRules, $dataToValidate);
         $this->assertTrue($result->isFailed());
     }
+
+    public function testValidatorWithUuidRule()
+    {
+        $validationRules = [
+            'uuid-field' => 'uuid',
+        ];
+        $dataToValidate = [
+            'uuid-field' => '123e4567-e89b-12d3-a456-426614174000',
+        ];
+
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertFalse($result->isFailed());
+
+        $dataToValidate['uuid-field'] = 'invalid-uuid';
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertTrue($result->isFailed());
+        $this->assertEquals('The uuid-field is not a valid UUID.', $result->getFailedRules()[0]['message']);
+    }
 }

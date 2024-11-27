@@ -521,4 +521,16 @@ class ValidationRules
 
         return mb_check_encoding($data, $value);
     }
+
+    /**
+     * @param mixed $data
+     * @param string|null $key
+     * @param mixed|null $value
+     * @param array $dataToValidate
+     * @return bool
+     */
+    public static function uuid(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    {
+        return preg_match('/^\{?[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}\}?$/', $data) === 1;
+    }
 }
