@@ -23,7 +23,9 @@
 21. [Present](#example-present)
 22. [Different](#example-different)
 23. [Charset](#example-charset)
-23. [UUID](#example-uuid)
+24. [UUID](#example-uuid)
+25. [Slug](#example-slug)
+26. [IBAN](#example-iban)
 
 
 
@@ -917,5 +919,62 @@ if ($result->isFailed()) {
 }
 ```
 
+### Example: `Slug`
+
+This code validates that the `slug` field contains a valid slug (lowercase letters, numbers, and hyphens). It first checks a valid slug (`valid-slug-123`) and then an invalid one (`Invalid Slug!`).
+
+```php
+$validationRules = [
+    'slug' => 'slug',
+];
+$dataToValidate = [
+    'slug' => 'valid-slug-123',
+];
+
+$result = Validator::make($validationRules, $dataToValidate);
+if ($result->isFailed()) {
+    echo "Validation failed";
+} else {
+    echo "Validation successful!";
+}
+
+$dataToValidate['slug'] = 'Invalid Slug!';
+$result = Validator::make($validationRules, $dataToValidate);
+if ($result->isFailed()) {
+    echo "Validation failed";
+} else {
+    echo "Validation successful!";
+}
+```
+
+### Example: `IBAN`
+
+This code validates that the `iban` field contains a valid IBAN. It first checks a valid IBAN (`GB82WEST12345698765432`) and then an invalid one (`invalid-iban`).
+
+```php
+$validationRules = [
+    'iban' => 'iban',
+];
+$dataToValidate = [
+    'iban' => 'GB82WEST12345698765432',
+];
+
+$result = Validator::make($validationRules, $dataToValidate);
+if ($result->isFailed()) {
+    echo "Validation failed";
+} else {
+    echo "Validation successful!";
+}
+
+$dataToValidate['iban'] = 'invalid-iban';
+$result = Validator::make($validationRules, $dataToValidate);
+if ($result->isFailed()) {
+    echo "Validation failed";
+} else {
+    echo "Validation successful!";
+}
+```
+
+[^ Back to top](#table-of-contents)
 
 [<< Back to Readme](../Readme.md)
