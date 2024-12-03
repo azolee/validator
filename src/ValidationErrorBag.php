@@ -45,6 +45,8 @@ class ValidationErrorBag implements ValidationErrorBagInterface
         'present' => 'The :attribute field must be present.',
         'charset' => 'The :attribute is not valid :value charset.',
         'uuid' => 'The :attribute is not a valid UUID.',
+        'slug' => 'The :attribute is not a valid slug.',
+        'iban' => 'The :attribute is not a valid IBAN.',
     ];
 
     /**

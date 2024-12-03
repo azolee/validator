@@ -159,7 +159,15 @@ This document describes the validation rules available in the `Azolee\Validator\
 ### `uuid`
 - **Description**: Validates that the data is a valid UUID.
 - **Usage**: `uuid`
-- **Parameters**: None
+
+### `slug`
+- **Description**: Validates that the data is a valid slug (lowercase letters, numbers, and hyphens).
+- **Usage**: `slug`
+
+### `iban`
+- **Description**: Validates that the data is a valid IBAN.
+- **Usage**: `iban`
+
 
 ### Callable Rules
 
@@ -174,3 +182,4 @@ $validationRules = [
         return $data === 'expected_value';
     },
 ];
+```
