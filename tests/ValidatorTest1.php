@@ -45,4 +45,22 @@ class ValidatorTest1 extends TestCase
         $this->assertTrue($result->isFailed());
         $this->assertEquals('The iban-no is not a valid IBAN.', $result->getFailedRules()[0]['message']);
     }
+
+    public function testValidatorWithHexColorRule()
+    {
+        $validationRules = [
+            'color' => 'hex_color',
+        ];
+        $dataToValidate = [
+            'color' => '#aabbcc',
+        ];
+
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertFalse($result->isFailed());
+
+        $dataToValidate['color'] = 'invalid-color';
+        $result = Validator::make($validationRules, $dataToValidate);
+        $this->assertTrue($result->isFailed());
+        $this->assertEquals('The color is not a valid hex color.', $result->getFailedRules()[0]['message']);
+    }
 }

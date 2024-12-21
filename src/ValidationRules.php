@@ -587,4 +587,16 @@ class ValidationRules
 
         return $checksum == 1;
     }
+
+    /**
+     * @param mixed $data
+     * @param string|null $key
+     * @param mixed|null $value
+     * @param array $dataToValidate
+     * @return bool
+     */
+    public static function hex_color(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    {
+        return preg_match('/^#?([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/', $data) === 1;
+    }
 }
