@@ -26,6 +26,7 @@
 24. [UUID](#example-uuid)
 25. [Slug](#example-slug)
 26. [IBAN](#example-iban)
+27. [Hex Color](#example-hex-color)
 
 
 
@@ -967,6 +968,34 @@ if ($result->isFailed()) {
 }
 
 $dataToValidate['iban'] = 'invalid-iban';
+$result = Validator::make($validationRules, $dataToValidate);
+if ($result->isFailed()) {
+    echo "Validation failed";
+} else {
+    echo "Validation successful!";
+}
+```
+
+### Example: `Hex Color`
+
+This code validates that the `color` field contains a valid hex color code. It first checks a valid hex color (`#aabbcc`) and then an invalid one (`invalid-color`).
+
+```php
+$validationRules = [
+    'color' => 'hex_color',
+];
+$dataToValidate = [
+    'color' => '#aabbcc',
+];
+
+$result = Validator::make($validationRules, $dataToValidate);
+if ($result->isFailed()) {
+    echo "Validation failed";
+} else {
+    echo "Validation successful!";
+}
+
+$dataToValidate['color'] = 'invalid-color';
 $result = Validator::make($validationRules, $dataToValidate);
 if ($result->isFailed()) {
     echo "Validation failed";

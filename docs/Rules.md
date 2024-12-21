@@ -168,12 +168,15 @@ This document describes the validation rules available in the `Azolee\Validator\
 - **Description**: Validates that the data is a valid IBAN.
 - **Usage**: `iban`
 
+### `hex_color`
+- **Description**: Validates that the data is a valid hex color code.
+- **Usage**: `hex_color`
 
-### Callable Rules
+## Callable Rules
 
 Callable rules are custom validation rules defined as closures or callable functions. They should return a boolean value indicating whether the validation passed or failed.
 
-#### Example
+### Example
 
 ```php
 $validationRules = [

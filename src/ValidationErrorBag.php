@@ -47,6 +47,7 @@ class ValidationErrorBag implements ValidationErrorBagInterface
         'uuid' => 'The :attribute is not a valid UUID.',
         'slug' => 'The :attribute is not a valid slug.',
         'iban' => 'The :attribute is not a valid IBAN.',
+        'hex_color' => 'The :attribute is not a valid hex color.',
     ];
 
     /**
