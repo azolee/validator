@@ -63,4 +63,27 @@ class ValidatorTest1 extends TestCase
         $this->assertTrue($result->isFailed());
         $this->assertEquals('The color is not a valid hex color.', $result->getFailedRules()[0]['message']);
     }
+
+    public function testTimezoneValidation()
+    {
+        $data = [
+            'user_timezone' => 'America/New_York',
+        ];
+
+        $rules = [
+            'user_timezone' => 'timezone',
+        ];
+
+        $result = Validator::make($rules, $data);
+
+        $this->assertFalse($result->isFailed());
+
+        $data = [
+            'user_timezone' => 'Invalid/Timezone',
+        ];
+
+        $result = Validator::make($rules, $data);
+
+        $this->assertTrue($result->isFailed());
+    }
 }

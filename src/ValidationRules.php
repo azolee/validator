@@ -599,4 +599,16 @@ class ValidationRules
     {
         return preg_match('/^#?([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/', $data) === 1;
     }
+
+    /**
+     * @param mixed $data
+     * @param string|null $key
+     * @param mixed|null $value
+     * @param array $dataToValidate
+     * @return bool
+     */
+    public static function timezone(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    {
+        return in_array($data, timezone_identifiers_list(), true);
+    }
 }
