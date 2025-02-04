@@ -172,6 +172,10 @@ This document describes the validation rules available in the `Azolee\Validator\
 - **Description**: Validates that the data is a valid hex color code.
 - **Usage**: `hex_color`
 
+### `timezone`
+- **Description**: Validates that the data is a valid timezone identifier.
+- **Usage**: `timezone`
+
 ## Callable Rules
 
 Callable rules are custom validation rules defined as closures or callable functions. They should return a boolean value indicating whether the validation passed or failed.

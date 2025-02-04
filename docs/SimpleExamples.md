@@ -1004,6 +1004,28 @@ if ($result->isFailed()) {
 }
 ```
 
+### Example: `Timezone Validation`
+
+This code validates that the `user_timezone` field contains a valid timezone representation.
+
+```php
+
+$data = [
+    'user_timezone' => 'America/New_York',
+];
+
+$rules = [
+    'user_timezone' => 'timezone',
+];
+
+$validator = Validator::make($rules, $data);
+
+if ($validator->fails()) {
+    echo "Validation failed.";
+} else {
+    echo "Validation passed.";
+}
+
 [^ Back to top](#table-of-contents)
 
 [<< Back to Readme](../Readme.md)
