@@ -49,6 +49,8 @@ class ValidationErrorBag implements ValidationErrorBagInterface
         'iban' => 'The :attribute is not a valid IBAN.',
         'hex_color' => 'The :attribute is not a valid hex color.',
         'timezone' => 'The :attribute is not a valid timezone.',
+        'min_words' => 'The :attribute must be at least :value words long.',
+        'max_words' => 'The :attribute must be at most :value words long.',
     ];
 
     /**

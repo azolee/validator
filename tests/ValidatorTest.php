@@ -695,7 +695,7 @@ class ValidatorTest extends TestCase
         $result = Validator::make($validationRules, $dataToValidate);
         $this->assertFalse($result->isFailed());
 
-        $dataToValidate['website'] = 'https://invalid-url.com';
+        $dataToValidate['website'] = 'https://khgvncabcasbqiuw.com';
         $result = Validator::make($validationRules, $dataToValidate);
         $this->assertTrue($result->isFailed());
     }

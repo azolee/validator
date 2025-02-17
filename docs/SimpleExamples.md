@@ -1025,6 +1025,39 @@ if ($validator->fails()) {
 } else {
     echo "Validation passed.";
 }
+```
+
+### Example: `Min Words`
+
+This code validates that the given string contains at least a specified number of words.
+
+```php
+$rules = ['description' => 'min_words:3'];
+$data = ['description' => 'This is a test'];
+$result = Validator::make($rules, $data);
+
+if ($validator->fails()) {
+    echo "Validation failed.";
+} else {
+    echo "Validation passed.";
+}
+```
+
+### Example: `Max Words`
+
+This code validates that the given string contains at most a specified number of words.
+
+```php
+$rules = ['description' => 'max_words:5'];
+$data = ['description' => 'This is a simple test'];
+$result = Validator::make($rules, $data);
+
+if ($validator->fails()) {
+    echo "Validation failed.";
+} else {
+    echo "Validation passed.";
+}
+```
 
 [^ Back to top](#table-of-contents)
 

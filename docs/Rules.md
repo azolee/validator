@@ -176,6 +176,18 @@ This document describes the validation rules available in the `Azolee\Validator\
 - **Description**: Validates that the data is a valid timezone identifier.
 - **Usage**: `timezone`
 
+### `min_words`
+- **Description**: Validates that the given string contains at least a specified number of words.
+- **Usage**: `min_words:3`
+- **Parameters**:
+  - `value` (int): The minimum number of words required.
+  
+### `max_words`
+- **Description**: Validates that the given string contains no more than a specified number of words.
+- **Usage**: `max_words:5`
+- **Parameters**:
+  - `value` (int): The maximum number of words allowed.
+
 ## Callable Rules
 
 Callable rules are custom validation rules defined as closures or callable functions. They should return a boolean value indicating whether the validation passed or failed.
