@@ -611,4 +611,30 @@ class ValidationRules
     {
         return in_array($data, timezone_identifiers_list(), true);
     }
+
+    /**
+     * @param mixed $data
+     * @param string|null $key
+     * @param mixed|null $value
+     * @param array $dataToValidate
+     * @return bool
+     */
+    public static function min_words(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    {
+        $wordCount = str_word_count($data);
+        return $wordCount >= $value;
+    }
+
+    /**
+     * @param mixed $data
+     * @param string|null $key
+     * @param mixed|null $value
+     * @param array $dataToValidate
+     * @return bool
+     */
+    public static function max_words(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    {
+        $wordCount = str_word_count($data);
+        return $wordCount <= $value;
+    }
 }

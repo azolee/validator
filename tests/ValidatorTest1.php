@@ -4,6 +4,7 @@ namespace Tests;
 
 use Azolee\Validator\Exceptions\InvalidValidationRule;
 use Azolee\Validator\Exceptions\ValidationException;
+use Azolee\Validator\ValidationRules;
 use Azolee\Validator\Validator;
 use PHPUnit\Framework\TestCase;
 use Tests\Helpers\CustomRules;
@@ -84,6 +85,47 @@ class ValidatorTest1 extends TestCase
 
         $result = Validator::make($rules, $data);
 
+        $this->assertTrue($result->isFailed());
+    }
+    public function testMinWords()
+    {
+        $data = [
+            'description' => 'This is a test',
+        ];
+
+        $rules = [
+            'description' => 'min_words:3',
+        ];
+
+        $result = Validator::make($rules, $data);
+        $this->assertFalse($result->isFailed());
+
+        $data = [
+            'description' => 'Test',
+        ];
+
+        $result = Validator::make($rules, $data);
+        $this->assertTrue($result->isFailed());
+    }
+
+    public function testMaxWords()
+    {
+        $data = [
+            'description' => 'This is a simple test',
+        ];
+
+        $rules = [
+            'description' => 'max_words:5',
+        ];
+
+        $result = Validator::make($rules, $data);
+        $this->assertFalse($result->isFailed());
+
+        $data = [
+            'description' => 'This is a very simple test with too many words',
+        ];
+
+        $result = Validator::make($rules, $data);
         $this->assertTrue($result->isFailed());
     }
 }
