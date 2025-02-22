@@ -21,8 +21,9 @@ class ValidationRuleEvaluator
      * @throws InvalidValidationRule
      * @throws ReflectionException
      */
-    public function evaluate(string|array|callable $rules, string $key, mixed $dataToValidate): void
+    public function evaluate(string|array|callable $rules, string $key, mixed $dataToValidate): ?array
     {
+        $validated = [];
         if (!is_array($rules)) {
             $rules = (is_string($rules) && str_contains($rules, '|')) ? explode('|', $rules) : [$rules];
         }
@@ -31,16 +32,19 @@ class ValidationRuleEvaluator
             if (ClassHelper::isCallable($rule)) {
                 if ($this->applyCallableRule($rule, $key, $dataToValidate) === false) {
                     $this->errorManager->setFailed('custom_rule', $key, $dataToValidate);
-                    return;
+                    return null;
                 }
+                $validated[] = $key;
                 continue;
             }
 
             if ($this->applyRule($rule, $key, $dataToValidate) === false) {
                 $this->errorManager->setFailed($rule, $key, $dataToValidate);
-                return;
+                return null;
             }
+            $validated[] = $key;
         }
+        return $validated;
     }
 
     /**
