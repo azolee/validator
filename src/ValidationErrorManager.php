@@ -15,6 +15,7 @@ class ValidationErrorManager
 
     public function setFailed(string $rule, string $key, mixed $dataToValidate, ?string $message = null): void
     {
+        $this->validationResult->flushValidated();
         $this->validationResult->setFailed($rule, $key, $dataToValidate, $message);
     }
 

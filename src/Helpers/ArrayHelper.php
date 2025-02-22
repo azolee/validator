@@ -4,6 +4,12 @@ namespace Azolee\Validator\Helpers;
 
 class ArrayHelper
 {
+    /**
+     * @param array $dataToValidate
+     * @param string $keys
+     * @param string $parentKey
+     * @return array|array[]
+     */
     public static function parseNestedData(array $dataToValidate, string $keys, string $parentKey = ''): array
     {
         $result = $dataToValidate;
@@ -35,6 +41,10 @@ class ArrayHelper
         return [['value' => $result, 'key' => rtrim($parentKey, '.'), 'type' => gettype($result)]];
     }
 
+    /**
+     * @param string $input
+     * @return array
+     */
     public static function transformStringToArray(string $input): array
     {
         $result = [];
@@ -52,6 +62,11 @@ class ArrayHelper
         return $result;
     }
 
+    /**
+     * @param array $array
+     * @param string $prefix
+     * @return array
+     */
     public static function prependStringToNumericKeys(array $array, string $prefix): array
     {
         $result = [];
@@ -61,6 +76,27 @@ class ArrayHelper
             } else {
                 $result[$key] = $value;
             }
+        }
+        return $result;
+    }
+
+    /**
+     * @param array $input
+     * @return array
+     */
+    public static function normalizeArray(array $input): array
+    {
+        $result = [];
+        foreach ($input as $item) {
+            $keys = explode('.', $item['key']);
+            $current = &$result;
+            foreach ($keys as $key) {
+                if (!isset($current[$key])) {
+                    $current[$key] = [];
+                }
+                $current = &$current[$key];
+            }
+            $current = $item['value'];
         }
         return $result;
     }

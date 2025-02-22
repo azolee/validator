@@ -80,6 +80,7 @@ class Validator
                 if ($this->validateRuleTypes($rules) === false) {
                     $message = "Invalid validation rule for $field. Rule should be a string, an array or a callable.";
                     if (!$this->config['silent']) {
+                        $this->errorManager->getValidationResult()->flushValidated();
                         throw new InvalidValidationRule($message);
                     }
                     $this->errorManager->setFailed('invalid_rule', $field, $rules, $message);
@@ -88,7 +89,12 @@ class Validator
 
                 $this->ruleEvaluator->evaluate($rules, $field, $dataToValidate);
 
+                if (!$this->errorManager->getValidationResult()->isFailed()) {
+                    $this->errorManager->getValidationResult()->setValidated($field, $dataToValidate);
+                }
+
                 if ($this->errorManager->getValidationResult()->isFailed() && !$this->config['silent']) {
+                    $this->errorManager->getValidationResult()->flushValidated();
                     throw new ValidationException($this->errorManager->getValidationResult()->getErrorsForFailure());
                 }
             }
