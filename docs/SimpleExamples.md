@@ -1059,6 +1059,38 @@ if ($validator->fails()) {
 }
 ```
 
+### Example: `Bail`
+
+This code demonstrates the `bail` rule, which stops further validation for a field as soon as one rule fails.
+
+```php
+$validationRules = [
+    'email' => ['bail', 'required', 'email'],
+];
+
+$dataToValidate = [
+    'email' => '',
+];
+
+$result = Validator::make($validationRules, $dataToValidate);
+
+if ($result->isFailed()) {
+    echo "Validation failed";
+} else {
+    echo "Validation successful!";
+}
+
+$dataToValidate['email'] = 'invalid-email';
+$result = Validator::make($validationRules, $dataToValidate);
+
+if ($result->isFailed()) {
+    echo "Validation failed";
+} else {
+    echo "Validation successful!";
+}
+```
+
+---
 [^ Back to top](#table-of-contents)
 
 [<< Back to Readme](../Readme.md)

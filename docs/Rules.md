@@ -188,6 +188,11 @@ This document describes the validation rules available in the `Azolee\Validator\
 - **Parameters**:
   - `value` (int): The maximum number of words allowed.
 
+### `bail`
+- **Description**: Stops further validation for a field as soon as one rule fails.
+- **Usage**: `bail`
+
+
 ## Callable Rules
 
 Callable rules are custom validation rules defined as closures or callable functions. They should return a boolean value indicating whether the validation passed or failed.

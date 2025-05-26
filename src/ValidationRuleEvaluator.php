@@ -2,6 +2,7 @@
 
 namespace Azolee\Validator;
 
+use Azolee\Validator\Contracts\CustomRule;
 use Azolee\Validator\Exceptions\InvalidValidationRule;
 use Azolee\Validator\Helpers\ArrayHelper;
 use Azolee\Validator\Helpers\ClassHelper;
@@ -10,12 +11,7 @@ use ReflectionException;
 
 class ValidationRuleEvaluator
 {
-    protected ValidationErrorManager $errorManager;
-
-    public function __construct(ValidationErrorManager $errorManager)
-    {
-        $this->errorManager = $errorManager;
-    }
+    public function __construct(protected ValidationErrorManager $errorManager) {}
 
     /**
      * @throws InvalidValidationRule
@@ -28,11 +24,31 @@ class ValidationRuleEvaluator
             $rules = (is_string($rules) && str_contains($rules, '|')) ? explode('|', $rules) : [$rules];
         }
 
+        $bail = false;
+
         foreach ($rules as $rule) {
+            if ($rule === 'bail') {
+                $bail = true;
+                continue;
+            }
+
+            if ($rule instanceof CustomRule) {
+                if (!$rule->validate($dataToValidate[$key] ?? null, $key, $dataToValidate)) {
+                    $this->errorManager->setFailed($rule::class, $key, $dataToValidate, $rule->message());
+                    if ($bail) {
+                        return null;
+                    }
+                }
+                $validated[] = $key;
+                continue;
+            }
+
             if (ClassHelper::isCallable($rule)) {
                 if ($this->applyCallableRule($rule, $key, $dataToValidate) === false) {
                     $this->errorManager->setFailed('custom_rule', $key, $dataToValidate);
-                    return null;
+                    if ($bail) {
+                        return null;
+                    }
                 }
                 $validated[] = $key;
                 continue;
@@ -40,9 +56,12 @@ class ValidationRuleEvaluator
 
             if ($this->applyRule($rule, $key, $dataToValidate) === false) {
                 $this->errorManager->setFailed($rule, $key, $dataToValidate);
-                return null;
+                if ($bail) {
+                    return null;
+                }
+            } else {
+                $validated[] = $key;
             }
-            $validated[] = $key;
         }
         return $validated;
     }
