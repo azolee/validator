@@ -8,6 +8,7 @@ use Azolee\Validator\Validators\Base64Validator;
 class ValidationRules
 {
     public const CUSTOM_RULE = 'custom_rule';
+    public const BAIL_RULE = 'bail';
 
     /**
      * @param mixed $data
@@ -18,7 +19,7 @@ class ValidationRules
      */
     public static function array(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
-        return is_array($data);
+        return is_null($data) || is_array($data);
     }
 
     /**
@@ -81,7 +82,7 @@ class ValidationRules
      */
     public static function email(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
-        return filter_var($data, FILTER_VALIDATE_EMAIL) !== false;
+        return is_null($data) || filter_var($data, FILTER_VALIDATE_EMAIL) !== false;
     }
 
     /**
@@ -93,7 +94,7 @@ class ValidationRules
      */
     public static function url(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
-        return filter_var($data, FILTER_VALIDATE_URL) !== false;
+        return is_null($data) || filter_var($data, FILTER_VALIDATE_URL) !== false;
     }
 
     /**
@@ -105,6 +106,9 @@ class ValidationRules
      */
     public static function min(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
+        if (is_null($data)) {
+            return true;
+        }
         if (is_numeric($data)) {
             return $data >= $value;
         }
@@ -126,6 +130,9 @@ class ValidationRules
      */
     public static function max(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
+        if (is_null($data)) {
+            return true;
+        }
         if (is_numeric($data)) {
             return $data <= $value;
         }
@@ -147,6 +154,9 @@ class ValidationRules
      */
     public static function in(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
+        if (is_null($data)) {
+            return true;
+        }
         return in_array($data, explode(',', $value));
     }
 
@@ -159,7 +169,7 @@ class ValidationRules
      */
     public static function date(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
-        return strtotime($data) !== false;
+        return is_null($data) || strtotime($data) !== false;
     }
 
     /**
@@ -171,6 +181,9 @@ class ValidationRules
      */
     public static function alpha(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
+        if (empty($data)) {
+            return true;
+        }
         return extension_loaded('ctype') ? ctype_alpha($data) : (preg_match('/^[a-zA-Z]+$/', $data) === 1);
     }
 
@@ -183,6 +196,9 @@ class ValidationRules
      */
     public static function alpha_num(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
+        if (empty($data)) {
+            return true;
+        }
         return extension_loaded('ctype') ? ctype_alnum($data) : (preg_match('/^[a-zA-Z0-9]+$/', $data) === 1);
     }
 
@@ -195,7 +211,7 @@ class ValidationRules
      */
     public static function digits(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
-        return is_numeric($data) && strlen((string)$data) == $value;
+        return is_null($data) || (is_numeric($data) && strlen((string)$data) == $value);
     }
 
     /**
@@ -207,6 +223,9 @@ class ValidationRules
      */
     public static function digits_between(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
+        if (empty($data)) {
+            return true;
+        }
         [$min, $max] = explode(',', $value);
         $length = strlen((string)$data);
         return is_numeric($data) && $length >= $min && $length <= $max;
@@ -221,7 +240,7 @@ class ValidationRules
      */
     public static function different(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
-        return !static::same($data, $key, $value, $dataToValidate);
+        return is_null($data) || !static::same($data, $key, $value, $dataToValidate);
     }
 
     /**
@@ -233,9 +252,13 @@ class ValidationRules
      */
     public static function same(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
+        if (is_null($data)) {
+            return true;
+        }
         $fieldToCompare = ArrayHelper::parseNestedData($dataToValidate, $value)[0] ?? ['value' => null];
         return $data === $fieldToCompare['value'];
     }
+
 
     /**
      * @param mixed $data
@@ -246,7 +269,7 @@ class ValidationRules
      */
     public static function ip(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
-        return filter_var($data, FILTER_VALIDATE_IP) !== false;
+        return is_null($data) || filter_var($data, FILTER_VALIDATE_IP) !== false;
     }
 
     /**
@@ -258,6 +281,9 @@ class ValidationRules
      */
     public static function json(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
+        if (empty($data)) {
+            return true;
+        }
         json_decode($data);
         return json_last_error() === JSON_ERROR_NONE;
     }
@@ -636,5 +662,151 @@ class ValidationRules
     {
         $wordCount = str_word_count($data);
         return $wordCount <= $value;
+    }
+
+    /**
+     * Validates that the given string is safe HTML.
+     * - Disallows dangerous tags like: script, iframe, object, embed, link, meta, style, form, input, button, textarea, select
+     * - Disallows event handler attributes (on*)
+     * - Disallows javascript: URLs
+     * - Limits tags to an allowed list (default: a,b,strong,em,i,u,br,p,ul,ol,li,span). You can override via comma-separated list in $value.
+     * - Limits attributes to a safe set: href,title,rel,target,class,id,alt
+     *
+     * @param mixed $data
+     * @param string|null $key
+     * @param mixed|null $value Comma-separated allowed tags (e.g. "a,p,br")
+     * @param array $dataToValidate
+     * @return bool
+     */
+    public static function html_safe(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    {
+        if ($data === null || $data === '') {
+            return true;
+        }
+        if (!is_string($data)) {
+            return false;
+        }
+
+        $allowedTags = $value
+            ? array_values(array_filter(array_map(static fn($t) => strtolower(trim($t)), explode(',', (string)$value))))
+            : ['a', 'b', 'strong', 'em', 'i', 'u', 'br', 'p', 'ul', 'ol', 'li', 'span'];
+
+        $disallowedTags = ['script', 'iframe', 'object', 'embed', 'link', 'meta', 'style', 'form', 'input', 'button', 'textarea', 'select'];
+        $safeAttributes = ['href', 'title', 'rel', 'target', 'class', 'id', 'alt'];
+
+        $lower = strtolower($data);
+
+        foreach ($disallowedTags as $tag) {
+            if (strpos($lower, "<{$tag}") !== false || strpos($lower, "</{$tag}") !== false) {
+                return false;
+            }
+        }
+        if (stripos($lower, 'javascript:') !== false) {
+            return false;
+        }
+        if (preg_match('/\son[a-z0-9_-]+\s*=/i', $lower) === 1) {
+            return false;
+        }
+
+        if (preg_match_all('/<\s*\/?\s*([a-z0-9]+)([^>]*)>/i', $data, $matches)) {
+            $tags = $matches[1];
+            $attrs = $matches[2];
+
+            foreach ($tags as $tag) {
+                $t = strtolower($tag);
+                if (!in_array($t, $allowedTags, true)) {
+                    return false;
+                }
+            }
+
+            foreach ($attrs as $attrChunk) {
+                if (trim($attrChunk) === '') {
+                    continue;
+                }
+
+                if (preg_match('/\bon[a-z0-9_-]+\b/i', $attrChunk) === 1) {
+                    return false;
+                }
+
+                if (preg_match_all('/([a-z0-9:-]+)\s*=\s*("[^"]*"|\'[^\']*\'|[^"\'>\s]+)/i', $attrChunk, $attrMatches)) {
+                    $names = $attrMatches[1];
+                    $values = $attrMatches[2];
+                    foreach ($names as $idx => $name) {
+                        $an = strtolower($name);
+                        if (!in_array($an, $safeAttributes, true)) {
+                            return false;
+                        }
+                        if (in_array($an, ['href', 'src'], true)) {
+                            $val = strtolower(trim($values[$idx], " \t\n\r\0\x0B\"'"));
+                            if (str_starts_with($val, 'javascript:')) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Validates that the given value is a MAC address.
+     * Supported formats:
+     * - 00:1A:2B:3C:4D:5E
+     * - 00-1A-2B-3C-4D-5E
+     * - 001A.2B3C.4D5E
+     * - 001A2B3C4D5E
+     *
+     * @param mixed $data
+     * @param string|null $key
+     * @param mixed|null $value
+     * @param array $dataToValidate
+     * @return bool
+     */
+    public static function mac_address(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    {
+        if ($data === null || $data === '') {
+            return true;
+        }
+        if (!is_string($data)) {
+            return false;
+        }
+
+        $patterns = [
+            '/^([0-9A-Fa-f]{2}[:\-]){5}[0-9A-Fa-f]{2}$/',
+            '/^([0-9A-Fa-f]{4}\.){2}[0-9A-Fa-f]{4}$/',
+            '/^[0-9A-Fa-f]{12}$/',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $data) === 1) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Validates that the given value is a valid domain name (hostname).
+     * Note: This validates the syntax of a domain (not a URL and not DNS existence).
+     *
+     * @param mixed $data
+     * @param string|null $key
+     * @param mixed|null $value
+     * @param array $dataToValidate
+     * @return bool
+     */
+    public static function domain(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    {
+        if ($data === null || $data === '') {
+            return true;
+        }
+        if (!is_string($data)) {
+            return false;
+        }
+
+        return filter_var($data, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME) !== false;
     }
 }
