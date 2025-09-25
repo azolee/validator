@@ -188,9 +188,34 @@ This document describes the validation rules available in the `Azolee\Validator\
 - **Parameters**:
   - `value` (int): The maximum number of words allowed.
 
+### `html_safe`
+- **Description**: Validates that the string contains only safe HTML.
+- **Usage**: `html_safe` or `html_safe:a,p,br`
+- **Notes**:
+    - Disallows dangerous tags (script, iframe, object, embed, link, meta, style, form, input, button, textarea, select).
+    - Disallows event attributes (on*) and javascript: URLs.
+    - Allowed tags (default): a, b, strong, em, i, u, br, p, ul, ol, li, span.
+    - Allowed attributes: href, title, rel, target, class, id, alt.
+
+### `mac_address`
+- **Description**: Validates that the value is a valid MAC address.
+- **Usage**: `mac_address`
+- **Supported formats**:
+    - `00:1A:2B:3C:4D:5E`
+    - `00-1A-2B-3C-4D-5E`
+    - `001A.2B3C.4D5E`
+    - `001A2B3C4D5E`
+
+### `domain`
+- **Description**: Validates that the value is a valid domain name (hostname), not a URL.
+- **Usage**: `domain`
+- **Notes**:
+    - Syntax-only check using PHP’s FILTER_VALIDATE_DOMAIN with FILTER_FLAG_HOSTNAME.
+
 ### `bail`
 - **Description**: Stops further validation for a field as soon as one rule fails.
 - **Usage**: `bail`
+
 
 
 ## Callable Rules

@@ -25,12 +25,18 @@ class ValidationRuleEvaluator
         }
 
         $bail = false;
-
+        $filteredRules = [];
         foreach ($rules as $rule) {
-            if ($rule === 'bail') {
+            if (is_string($rule) && $rule === ValidationRules::BAIL_RULE) {
                 $bail = true;
                 continue;
             }
+            $filteredRules[] = $rule;
+        }
+        $rules = $filteredRules;
+
+
+        foreach ($rules as $rule) {
 
             if ($rule instanceof CustomRule) {
                 if (!$rule->validate($dataToValidate[$key] ?? null, $key, $dataToValidate)) {

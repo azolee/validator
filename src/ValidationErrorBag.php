@@ -51,6 +51,9 @@ class ValidationErrorBag implements ValidationErrorBagInterface
         'timezone' => 'The :attribute is not a valid timezone.',
         'min_words' => 'The :attribute must be at least :value words long.',
         'max_words' => 'The :attribute must be at most :value words long.',
+        'html_safe' => 'The :attribute contains unsafe HTML.',
+        'mac_address' => 'The :attribute must be a valid MAC address.',
+        'domain' => 'The :attribute must be a valid domain name.',
     ];
 
     /**

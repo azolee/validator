@@ -27,6 +27,9 @@
 25. [Slug](#example-slug)
 26. [IBAN](#example-iban)
 27. [Hex Color](#example-hex-color)
+28. [HTML Safe](#example-html-safe)
+29. [MAC Address](#example-mac-address)
+30. [Domain](#example-domain)
 
 
 
@@ -1088,6 +1091,85 @@ if ($result->isFailed()) {
 } else {
     echo "Validation successful!";
 }
+```
+
+### Example: `HTML Safe`
+
+The html_safe rule only allows safe HTML elements (dangerous tags, on* attributes, and javascript: are disallowed). Default allowed tags: a, b, strong, em, i, u, br, p, ul, ol, li, span. You can optionally specify your own list.
+
+```php
+<?php
+use Azolee\Validator\Validator;
+
+// HTML Safe example
+$validationRules = [
+    // allow only p, a, br tags
+    'content' => 'html_safe:p,a,br',
+];
+
+$dataToValidate = [
+    'content' => '<p>Hello <a href="https://example.com" target="_blank" rel="noopener">world</a><br></p>',
+];
+
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+
+// Unsafe HTML (should fail)
+$dataToValidate['content'] = '<script>alert(1)</script><p onclick="evil()">Hi</p>';
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+```
+
+### Example: `MAC Address`
+
+The mac_address rule validates the MAC address format. Supported formats: 00:1A:2B:3C:4D:5E, 00-1A-2B-3C-4D-5E, 001A.2B3C.4D5E, 001A2B3C4D5E.
+
+```php
+<?php
+use Azolee\Validator\Validator;
+
+// MAC Address example
+$validationRules = [
+    'device_mac' => 'mac_address',
+];
+
+$dataToValidate = [
+    'device_mac' => '00:1A:2B:3C:4D:5E',
+];
+
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+
+// Invalid MAC (should fail)
+$dataToValidate['device_mac'] = '00:1G:2B:3C:4D:5E';
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+```
+
+### Example: `Domain`
+
+The domain rule checks the syntax of a domain name (hostname) (not a full URL, and no DNS validation).
+
+```php
+<?php
+use Azolee\Validator\Validator;
+
+// Domain example
+$validationRules = [
+    'host' => 'domain',
+];
+
+$dataToValidate = [
+    'host' => 'example.com',
+];
+
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+
+// Invalid: this is a URL, not a plain domain (should fail)
+$dataToValidate['host'] = 'https://example.com';
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
 ```
 
 ---
