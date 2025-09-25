@@ -13,8 +13,7 @@ class ValidationResult
     public function __construct(
         protected ValidationErrorBagInterface $validationError = new ValidationErrorBag(),
         protected array $failedRules = []
-    )
-    {
+    ) {
     }
 
     /**
@@ -30,13 +29,13 @@ class ValidationResult
         if (ClassHelper::isCallable($rule)) {
             $rule = ValidationRules::CUSTOM_RULE;
         }
-        if(str_contains($rule, ':')) {
+        if (str_contains($rule, ':')) {
             $ruleParts = explode(':', $rule, 2);
             $rule = array_shift($ruleParts);
             $values = ArrayHelper::prependStringToNumericKeys(
-                    ArrayHelper::transformStringToArray(join(',', $ruleParts)),
-                    'value'
-                );
+                ArrayHelper::transformStringToArray(join(',', $ruleParts)),
+                'value'
+            );
             $extraParams = array_merge($values, $extraParams);
         }
 
@@ -66,7 +65,10 @@ class ValidationResult
             $this->validatedData = array_merge_recursive($this->validatedData, $dataSet);
             return;
         }
-        $this->validatedData[$key] = $dataToValidate[$key];
+
+        if ($dataToValidate[$key] ?? false) {
+            $this->validatedData[$key] = $dataToValidate[$key];
+        }
     }
 
     /**

@@ -181,10 +181,9 @@ class ValidationRules
      */
     public static function alpha(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
-        if (empty($data)) {
+        if (is_null($data)) {
             return true;
-        }
-        return extension_loaded('ctype') ? ctype_alpha($data) : (preg_match('/^[a-zA-Z]+$/', $data) === 1);
+        }        return extension_loaded('ctype') ? ctype_alpha($data) : (preg_match('/^[a-zA-Z]+$/', $data) === 1);
     }
 
     /**
@@ -196,10 +195,9 @@ class ValidationRules
      */
     public static function alpha_num(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
-        if (empty($data)) {
+        if (is_null($data)) {
             return true;
-        }
-        return extension_loaded('ctype') ? ctype_alnum($data) : (preg_match('/^[a-zA-Z0-9]+$/', $data) === 1);
+        }        return extension_loaded('ctype') ? ctype_alnum($data) : (preg_match('/^[a-zA-Z0-9]+$/', $data) === 1);
     }
 
     /**
@@ -223,9 +221,10 @@ class ValidationRules
      */
     public static function digits_between(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
-        if (empty($data)) {
+        if (is_null($data)) {
             return true;
         }
+
         [$min, $max] = explode(',', $value);
         $length = strlen((string)$data);
         return is_numeric($data) && $length >= $min && $length <= $max;
@@ -255,6 +254,7 @@ class ValidationRules
         if (is_null($data)) {
             return true;
         }
+
         $fieldToCompare = ArrayHelper::parseNestedData($dataToValidate, $value)[0] ?? ['value' => null];
         return $data === $fieldToCompare['value'];
     }
@@ -281,9 +281,10 @@ class ValidationRules
      */
     public static function json(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
-        if (empty($data)) {
+        if (is_null($data)) {
             return true;
         }
+
         json_decode($data);
         return json_last_error() === JSON_ERROR_NONE;
     }
@@ -297,6 +298,10 @@ class ValidationRules
      */
     public static function regex(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
+        if (is_null($data)) {
+            return true;
+        }
+
         return preg_match($value, $data) === 1;
     }
 
@@ -321,6 +326,10 @@ class ValidationRules
      */
     public static function contains(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
+        if (is_null($data)) {
+            return true;
+        }
+
         return str_contains($data, $value);
     }
 
@@ -333,7 +342,11 @@ class ValidationRules
      */
     public static function alpha_dash(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
-        return preg_match('/^[a-zA-Z0-9_-]+$/', $data) === 1;
+        if (is_null($data)) {
+            return true;
+        }
+
+        return preg_match('/^[a-zA-Z0-9_-]+$/', $data ?? "") === 1;
     }
 
     /**
@@ -345,6 +358,10 @@ class ValidationRules
      */
     public static function after(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
+        if (is_null($data)) {
+            return true;
+        }
+
         return strtotime($data) > strtotime($value);
     }
 
@@ -357,6 +374,10 @@ class ValidationRules
      */
     public static function before(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
+        if (is_null($data)) {
+            return true;
+        }
+
         return strtotime($data) < strtotime($value);
     }
 
@@ -369,6 +390,10 @@ class ValidationRules
      */
     public static function active_url(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
+        if (is_null($data)) {
+            return true;
+        }
+
         return filter_var($data, FILTER_VALIDATE_URL) !== false && checkdnsrr(parse_url($data, PHP_URL_HOST), 'A');
     }
 
@@ -381,6 +406,10 @@ class ValidationRules
      */
     public static function ascii(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
+        if (is_null($data)) {
+            return true;
+        }
+
         return mb_check_encoding($data, 'ASCII');
     }
 
@@ -393,6 +422,10 @@ class ValidationRules
      */
     public static function date_equals(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
+        if (is_null($data)) {
+            return true;
+        }
+
         return date('Y-m-d', strtotime($data)) === date('Y-m-d', strtotime($value));
     }
 
@@ -405,6 +438,10 @@ class ValidationRules
      */
     public static function distinct(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
+        if (is_null($data)) {
+            return true;
+        }
+
         $strict = false;
         $ignoreCase = false;
 
@@ -440,6 +477,10 @@ class ValidationRules
      */
     public static function date_format(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
+        if (is_null($data)) {
+            return true;
+        }
+
         $formats = explode(',', $value);
         foreach ($formats as $format) {
             $parsedDate = date_create_from_format($format, $data);
@@ -459,6 +500,10 @@ class ValidationRules
      */
     public static function password(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
+        if (is_null($data)) {
+            return true;
+        }
+
         $config = [
             'require_uppercase' => false,
             'require_lowercase' => false,
@@ -502,6 +547,10 @@ class ValidationRules
      */
     public static function base64(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
+        if (is_null($data)) {
+            return true;
+        }
+
         return Base64Validator::validateString($data, $key, $value, $dataToValidate);
     }
 
@@ -516,6 +565,10 @@ class ValidationRules
      */
     public static function base64_image(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
+        if (is_null($data)) {
+            return true;
+        }
+
         return Base64Validator::validateImage($data, $key, $value, $dataToValidate);
     }
 
@@ -541,6 +594,10 @@ class ValidationRules
      */
     public static function charset(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
+        if (is_null($data)) {
+            return true;
+        }
+
         if (!in_array($value, mb_list_encodings(), true)) {
             return false;
         }
@@ -557,7 +614,11 @@ class ValidationRules
      */
     public static function uuid(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
-        return preg_match('/^\{?[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}\}?$/', $data) === 1;
+        if (is_null($data)) {
+            return true;
+        }
+
+        return preg_match('/^\{?[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}\}?$/', $data ?? "") === 1;
     }
 
     /**
@@ -569,7 +630,11 @@ class ValidationRules
      */
     public static function slug(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
-        return preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $data) === 1;
+        if (is_null($data)) {
+            return true;
+        }
+
+        return preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $data ?? "") === 1;
     }
 
     /**
@@ -581,6 +646,10 @@ class ValidationRules
      */
     public static function iban(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
+        if (is_null($data)) {
+            return true;
+        }
+
         $iban = strtolower(str_replace(' ', '', $data));
         $countries = [
             'al' => 28, 'ad' => 24, 'at' => 20, 'az' => 28, 'bh' => 22, 'be' => 16, 'ba' => 20, 'br' => 29,
@@ -623,6 +692,10 @@ class ValidationRules
      */
     public static function hex_color(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
+        if (is_null($data)) {
+            return true;
+        }
+
         return preg_match('/^#?([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/', $data) === 1;
     }
 
@@ -635,6 +708,10 @@ class ValidationRules
      */
     public static function timezone(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
+        if (is_null($data)) {
+            return true;
+        }
+
         return in_array($data, timezone_identifiers_list(), true);
     }
 
@@ -647,6 +724,10 @@ class ValidationRules
      */
     public static function min_words(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
+        if (is_null($data)) {
+            return true;
+        }
+
         $wordCount = str_word_count($data);
         return $wordCount >= $value;
     }
@@ -660,6 +741,10 @@ class ValidationRules
      */
     public static function max_words(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
+        if (is_null($data)) {
+            return true;
+        }
+
         $wordCount = str_word_count($data);
         return $wordCount <= $value;
     }
@@ -680,7 +765,7 @@ class ValidationRules
      */
     public static function html_safe(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
-        if ($data === null || $data === '') {
+        if (is_null($data)) {
             return true;
         }
         if (!is_string($data)) {
@@ -766,9 +851,10 @@ class ValidationRules
      */
     public static function mac_address(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
-        if ($data === null || $data === '') {
+        if (is_null($data)) {
             return true;
         }
+
         if (!is_string($data)) {
             return false;
         }
@@ -800,9 +886,10 @@ class ValidationRules
      */
     public static function domain(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
-        if ($data === null || $data === '') {
+        if (is_null($data)) {
             return true;
         }
+
         if (!is_string($data)) {
             return false;
         }
