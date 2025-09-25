@@ -252,12 +252,13 @@ class ValidationRules
      */
     public static function same(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
     {
-        if (empty($data)) {
+        if (is_null($data)) {
             return true;
         }
         $fieldToCompare = ArrayHelper::parseNestedData($dataToValidate, $value)[0] ?? ['value' => null];
         return $data === $fieldToCompare['value'];
     }
+
 
     /**
      * @param mixed $data

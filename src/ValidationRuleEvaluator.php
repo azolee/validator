@@ -35,7 +35,6 @@ class ValidationRuleEvaluator
         }
         $rules = $filteredRules;
 
-
         foreach ($rules as $rule) {
 
             if ($rule instanceof CustomRule) {
