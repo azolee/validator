@@ -54,6 +54,15 @@ class ValidationErrorBag implements ValidationErrorBagInterface
         'html_safe' => 'The :attribute contains unsafe HTML.',
         'mac_address' => 'The :attribute must be a valid MAC address.',
         'domain' => 'The :attribute must be a valid domain name.',
+        'bic' => 'The :attribute must be a valid BIC/SWIFT code.',
+        'cidr' => 'The :attribute must be a valid CIDR notation.',
+        'required_array_keys' => 'The :attribute must contain all required keys.',
+        'age_between' => 'The :attribute age must be between :value and :value1.',
+        'ean' => 'The :attribute must be a valid EAN barcode.',
+        'locale' => 'The :attribute must be a valid locale.',
+        'declined' => 'The :attribute must be declined.',
+        'duration' => 'The :attribute must be a valid ISO 8601 duration.',
+        'cron' => 'The :attribute must be a valid cron expression.',
     ];
 
     /**

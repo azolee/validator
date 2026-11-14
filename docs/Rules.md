@@ -216,7 +216,41 @@ This document describes the validation rules available in the `Azolee\Validator\
 - **Description**: Stops further validation for a field as soon as one rule fails.
 - **Usage**: `bail`
 
+### `bic`
+- **Description**: Validates that the data is a valid SWIFT/BIC code (8 or 11 characters).
+- **Usage**: `bic`
 
+### `cidr`
+- **Description**: Validates that the data is a valid CIDR notation (IPv4 or IPv6 with prefix length).
+- **Usage**: `cidr`
+
+### `required_array_keys`
+- **Description**: Validates that an array contains all of the given keys.
+- **Usage**: `required_array_keys:id,name,email`
+
+### `age_between`
+- **Description**: Validates that a date of birth yields an age within an inclusive range.
+- **Usage**: `age_between:18,65`
+
+### `ean`
+- **Description**: Validates that the data is a valid EAN-8 or EAN-13 barcode (checksum included).
+- **Usage**: `ean`
+
+### `locale`
+- **Description**: Validates that the data is a locale / language tag (e.g. `en`, `en_US`, `pt-BR`).
+- **Usage**: `locale`
+
+### `declined`
+- **Description**: Validates that the data is a declined boolean-like value (`no`, `off`, `0`, `false`).
+- **Usage**: `declined`
+
+### `duration`
+- **Description**: Validates that the data is a valid ISO 8601 duration (e.g. `PT15M`, `P1DT2H`).
+- **Usage**: `duration`
+
+### `cron`
+- **Description**: Validates that the data is a valid 5-field cron expression.
+- **Usage**: `cron`
 
 ## Callable Rules
 

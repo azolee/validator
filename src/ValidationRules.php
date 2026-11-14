@@ -896,4 +896,335 @@ class ValidationRules
 
         return filter_var($data, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME) !== false;
     }
+
+    /**
+     * Validates a SWIFT/BIC code (8 or 11 characters).
+     *
+     * @param mixed $data
+     * @param string|null $key
+     * @param mixed|null $value
+     * @param array $dataToValidate
+     * @return bool
+     */
+    public static function bic(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    {
+        if (is_null($data)) {
+            return true;
+        }
+
+        if (!is_string($data)) {
+            return false;
+        }
+
+        $bic = strtoupper(str_replace(' ', '', $data));
+
+        return preg_match('/^[A-Z]{4}[A-Z]{2}[A-Z0-9]{2}([A-Z0-9]{3})?$/', $bic) === 1;
+    }
+
+    /**
+     * Validates a CIDR notation address (IPv4 or IPv6 with prefix length).
+     *
+     * @param mixed $data
+     * @param string|null $key
+     * @param mixed|null $value
+     * @param array $dataToValidate
+     * @return bool
+     */
+    public static function cidr(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    {
+        if (is_null($data)) {
+            return true;
+        }
+
+        if (!is_string($data) || !str_contains($data, '/')) {
+            return false;
+        }
+
+        [$ip, $prefix] = explode('/', $data, 2);
+
+        if (!ctype_digit($prefix)) {
+            return false;
+        }
+
+        $prefixLength = (int) $prefix;
+
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+            return $prefixLength >= 0 && $prefixLength <= 32;
+        }
+
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+            return $prefixLength >= 0 && $prefixLength <= 128;
+        }
+
+        return false;
+    }
+
+    /**
+     * Validates that an array contains all of the given keys.
+     *
+     * @param mixed $data
+     * @param string|null $key
+     * @param mixed|null $value Comma-separated list of required keys
+     * @param array $dataToValidate
+     * @return bool
+     */
+    public static function required_array_keys(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    {
+        if (is_null($data)) {
+            return true;
+        }
+
+        if (!is_array($data)) {
+            return false;
+        }
+
+        $requiredKeys = array_filter(array_map('trim', explode(',', (string) $value)), static fn ($item) => $item !== '');
+
+        foreach ($requiredKeys as $requiredKey) {
+            if (!array_key_exists($requiredKey, $data)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Validates that a date of birth yields an age within the given inclusive range.
+     *
+     * @param mixed $data
+     * @param string|null $key
+     * @param mixed|null $value Format: "min,max" (e.g. "18,65")
+     * @param array $dataToValidate
+     * @return bool
+     */
+    public static function age_between(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    {
+        if (is_null($data)) {
+            return true;
+        }
+
+        if (!is_string($data) && !is_numeric($data)) {
+            return false;
+        }
+
+        $parts = array_map('trim', explode(',', (string) $value));
+        if (count($parts) !== 2 || !is_numeric($parts[0]) || !is_numeric($parts[1])) {
+            return false;
+        }
+
+        try {
+            $birthDate = new \DateTimeImmutable((string) $data);
+        } catch (\Exception) {
+            return false;
+        }
+
+        $age = $birthDate->diff(new \DateTimeImmutable('today'))->y;
+        $min = (int) $parts[0];
+        $max = (int) $parts[1];
+
+        return $age >= $min && $age <= $max;
+    }
+
+    /**
+     * Validates an EAN-8 or EAN-13 barcode (including checksum).
+     *
+     * @param mixed $data
+     * @param string|null $key
+     * @param mixed|null $value
+     * @param array $dataToValidate
+     * @return bool
+     */
+    public static function ean(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    {
+        if (is_null($data)) {
+            return true;
+        }
+
+        if (!is_string($data) && !is_int($data)) {
+            return false;
+        }
+
+        $ean = preg_replace('/\s+/', '', (string) $data);
+        $length = strlen($ean);
+
+        if (!ctype_digit($ean) || ($length !== 8 && $length !== 13)) {
+            return false;
+        }
+
+        $sum = 0;
+        for ($i = 0; $i < $length - 1; $i++) {
+            $digit = (int) $ean[$i];
+            $weight = (($length - 1 - $i) % 2 === 0) ? 1 : 3;
+            $sum += $digit * $weight;
+        }
+
+        $checkDigit = (10 - ($sum % 10)) % 10;
+
+        return $checkDigit === (int) $ean[$length - 1];
+    }
+
+    /**
+     * Validates a locale / language tag (e.g. en, en_US, pt-BR).
+     *
+     * @param mixed $data
+     * @param string|null $key
+     * @param mixed|null $value
+     * @param array $dataToValidate
+     * @return bool
+     */
+    public static function locale(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    {
+        if (is_null($data)) {
+            return true;
+        }
+
+        if (!is_string($data)) {
+            return false;
+        }
+
+        return preg_match('/^[a-z]{2,3}([_-][A-Za-z]{2})?$/', $data) === 1;
+    }
+
+    /**
+     * Validates that the value is a declined boolean-like value (no, off, 0, false).
+     *
+     * @param mixed $data
+     * @param string|null $key
+     * @param mixed|null $value
+     * @param array $dataToValidate
+     * @return bool
+     */
+    public static function declined(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    {
+        if (is_null($data)) {
+            return false;
+        }
+
+        if (is_bool($data)) {
+            return $data === false;
+        }
+
+        if (is_int($data) || is_float($data)) {
+            return (int) $data === 0;
+        }
+
+        if (!is_string($data)) {
+            return false;
+        }
+
+        return in_array(strtolower(trim($data)), ['no', 'off', '0', 'false'], true);
+    }
+
+    /**
+     * Validates an ISO 8601 duration (e.g. PT15M, P1DT2H).
+     *
+     * @param mixed $data
+     * @param string|null $key
+     * @param mixed|null $value
+     * @param array $dataToValidate
+     * @return bool
+     */
+    public static function duration(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    {
+        if (is_null($data)) {
+            return true;
+        }
+
+        if (!is_string($data)) {
+            return false;
+        }
+
+        return preg_match(
+            '/^P(?!$)(\d+Y)?(\d+M)?(\d+W)?(\d+D)?(T(?=\d)(\d+H)?(\d+M)?(\d+S)?)?$/',
+            $data
+        ) === 1;
+    }
+
+    /**
+     * Validates a 5-field cron expression.
+     *
+     * @param mixed $data
+     * @param string|null $key
+     * @param mixed|null $value
+     * @param array $dataToValidate
+     * @return bool
+     */
+    public static function cron(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    {
+        if (is_null($data)) {
+            return true;
+        }
+
+        if (!is_string($data)) {
+            return false;
+        }
+
+        $fields = preg_split('/\s+/', trim($data));
+        if ($fields === false || count($fields) !== 5) {
+            return false;
+        }
+
+        $patterns = [
+            '(?:\*(?:\/\d+)?|\d+(?:-\d+)?(?:\/\d+)?(?:,\d+(?:-\d+)?(?:\/\d+)?)*)', // minute
+            '(?:\*(?:\/\d+)?|\d+(?:-\d+)?(?:\/\d+)?(?:,\d+(?:-\d+)?(?:\/\d+)?)*)', // hour
+            '(?:\*(?:\/\d+)?|\d+(?:-\d+)?(?:\/\d+)?(?:,\d+(?:-\d+)?(?:\/\d+)?)*)', // day of month
+            '(?:\*(?:\/\d+)?|\d+(?:-\d+)?(?:\/\d+)?(?:,\d+(?:-\d+)?(?:\/\d+)?)*)', // month
+            '(?:\*(?:\/\d+)?|\d+(?:-\d+)?(?:\/\d+)?(?:,\d+(?:-\d+)?(?:\/\d+)?)*)', // day of week
+        ];
+
+        $ranges = [
+            [0, 59],
+            [0, 23],
+            [1, 31],
+            [1, 12],
+            [0, 7],
+        ];
+
+        foreach ($fields as $index => $field) {
+            if (preg_match('/^' . $patterns[$index] . '$/', $field) !== 1) {
+                return false;
+            }
+
+            if (!self::cronFieldWithinRange($field, $ranges[$index][0], $ranges[$index][1])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static function cronFieldWithinRange(string $field, int $min, int $max): bool
+    {
+        foreach (explode(',', $field) as $part) {
+            $stepParts = explode('/', $part, 2);
+            $range = $stepParts[0];
+            $step = $stepParts[1] ?? null;
+
+            if ($step !== null && (!ctype_digit($step) || (int) $step < 1)) {
+                return false;
+            }
+
+            if ($range === '*') {
+                continue;
+            }
+
+            $bounds = explode('-', $range, 2);
+            foreach ($bounds as $bound) {
+                if (!ctype_digit($bound)) {
+                    return false;
+                }
+                $number = (int) $bound;
+                if ($number < $min || $number > $max) {
+                    return false;
+                }
+            }
+
+            if (count($bounds) === 2 && (int) $bounds[0] > (int) $bounds[1]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }
