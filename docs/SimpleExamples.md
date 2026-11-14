@@ -39,6 +39,19 @@
 37. [Declined](#example-declined)
 38. [Duration](#example-duration)
 39. [Cron](#example-cron)
+40. [Decimal](#example-decimal)
+41. [Money](#example-money)
+42. [Positive](#example-positive)
+43. [Currency](#example-currency)
+44. [Amount Between](#example-amount-between)
+45. [Credit Card](#example-credit-card)
+46. [Card Brand](#example-card-brand)
+47. [CVV](#example-cvv)
+48. [Expiry Date](#example-expiry-date)
+49. [Account Number](#example-account-number)
+50. [VAT](#example-vat)
+51. [Percentage](#example-percentage)
+52. [Minor Units](#example-minor-units)
 
 
 
@@ -1449,6 +1462,331 @@ echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
 
 // Invalid minute value (should fail)
 $dataToValidate['schedule'] = '60 * * * *';
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+```
+
+### Example: `Decimal`
+
+The decimal rule checks that a number has at most the given number of decimal places (default 2).
+
+```php
+<?php
+use Azolee\Validator\Validator;
+
+$validationRules = [
+    'rate' => 'decimal:2',
+];
+
+$dataToValidate = [
+    'rate' => '19.99',
+];
+
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+
+// Too many decimals (should fail)
+$dataToValidate['rate'] = '19.999';
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+```
+
+### Example: `Money`
+
+The money rule validates a non-negative amount with limited decimals.
+
+```php
+<?php
+use Azolee\Validator\Validator;
+
+$validationRules = [
+    'price' => 'money:2',
+];
+
+$dataToValidate = [
+    'price' => '19.99',
+];
+
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+
+// Negative amount (should fail)
+$dataToValidate['price'] = '-1.00';
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+```
+
+### Example: `Positive`
+
+The positive rule requires a number greater than zero.
+
+```php
+<?php
+use Azolee\Validator\Validator;
+
+$validationRules = [
+    'quantity' => 'positive',
+];
+
+$dataToValidate = [
+    'quantity' => 3,
+];
+
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+
+// Zero is not positive (should fail)
+$dataToValidate['quantity'] = 0;
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+```
+
+### Example: `Currency`
+
+The currency rule validates ISO 4217 codes such as EUR, HUF, or USD.
+
+```php
+<?php
+use Azolee\Validator\Validator;
+
+$validationRules = [
+    'currency' => 'currency',
+];
+
+$dataToValidate = [
+    'currency' => 'EUR',
+];
+
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+
+// Invalid code (should fail)
+$dataToValidate['currency'] = 'EURO';
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+```
+
+### Example: `Amount Between`
+
+The amount_between rule checks that a numeric amount is inside an inclusive range.
+
+```php
+<?php
+use Azolee\Validator\Validator;
+
+$validationRules = [
+    'total' => 'amount_between:0.01,9999.99',
+];
+
+$dataToValidate = [
+    'total' => '120.50',
+];
+
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+
+// Out of range (should fail)
+$dataToValidate['total'] = '0';
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+```
+
+### Example: `Credit Card`
+
+The credit_card rule validates card numbers with the Luhn checksum.
+
+```php
+<?php
+use Azolee\Validator\Validator;
+
+$validationRules = [
+    'card_number' => 'credit_card',
+];
+
+$dataToValidate = [
+    'card_number' => '4111111111111111',
+];
+
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+
+// Invalid checksum (should fail)
+$dataToValidate['card_number'] = '4111111111111112';
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+```
+
+### Example: `Card Brand`
+
+The card_brand rule checks that a number matches one of the allowed brands.
+
+```php
+<?php
+use Azolee\Validator\Validator;
+
+$validationRules = [
+    'card_number' => 'card_brand:visa,mastercard',
+];
+
+$dataToValidate = [
+    'card_number' => '4111111111111111',
+];
+
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+
+// Amex is not allowed here (should fail)
+$dataToValidate['card_number'] = '378282246310005';
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+```
+
+### Example: `CVV`
+
+The cvv rule validates a 3- or 4-digit security code.
+
+```php
+<?php
+use Azolee\Validator\Validator;
+
+$validationRules = [
+    'cvv' => 'cvv',
+];
+
+$dataToValidate = [
+    'cvv' => '123',
+];
+
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+
+// Invalid CVV (should fail)
+$dataToValidate['cvv'] = '12a';
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+```
+
+### Example: `Expiry Date`
+
+The expiry_date rule validates a card expiry that is not in the past.
+
+```php
+<?php
+use Azolee\Validator\Validator;
+
+$validationRules = [
+    'expires' => 'expiry_date:m/y',
+];
+
+$dataToValidate = [
+    'expires' => (new DateTimeImmutable('first day of +1 year'))->format('m/y'),
+];
+
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+
+// Past expiry (should fail)
+$dataToValidate['expires'] = '01/20';
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+```
+
+### Example: `Account Number`
+
+The account_number rule validates a digits-only domestic account number.
+
+```php
+<?php
+use Azolee\Validator\Validator;
+
+$validationRules = [
+    'account' => 'account_number:8,17',
+];
+
+$dataToValidate = [
+    'account' => '12345678',
+];
+
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+
+// Too short (should fail)
+$dataToValidate['account'] = '123';
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+```
+
+### Example: `VAT`
+
+The vat rule validates VAT / tax IDs, optionally filtered by country or EU format.
+
+```php
+<?php
+use Azolee\Validator\Validator;
+
+$validationRules = [
+    'tax_id' => 'vat:EU',
+];
+
+$dataToValidate = [
+    'tax_id' => 'DE123456789',
+];
+
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+
+// Invalid format (should fail)
+$dataToValidate['tax_id'] = 'INVALID';
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+```
+
+### Example: `Percentage`
+
+The percentage rule accepts values from 0 to 100.
+
+```php
+<?php
+use Azolee\Validator\Validator;
+
+$validationRules = [
+    'discount' => 'percentage:2',
+];
+
+$dataToValidate = [
+    'discount' => '12.50',
+];
+
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+
+// Out of range (should fail)
+$dataToValidate['discount'] = '150';
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+```
+
+### Example: `Minor Units`
+
+The minor_units rule validates non-negative integer amounts such as cents.
+
+```php
+<?php
+use Azolee\Validator\Validator;
+
+$validationRules = [
+    'amount_cents' => 'minor_units',
+];
+
+$dataToValidate = [
+    'amount_cents' => 1999,
+];
+
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+
+// Floats are not allowed (should fail)
+$dataToValidate['amount_cents'] = 19.99;
 $result = Validator::make($validationRules, $dataToValidate);
 echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
 ```

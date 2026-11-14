@@ -285,6 +285,96 @@ This document describes the validation rules available in the `Azolee\Validator\
     - Expects minute, hour, day-of-month, month, day-of-week.
     - Supports `*`, lists, ranges, and steps (e.g. `*/5`, `1-5`, `0,15,30,45`).
 
+### `decimal`
+- **Description**: Validates that the data is numeric with a limited number of decimal places.
+- **Usage**: `decimal` or `decimal:2` or `decimal:2,2`
+- **Parameters**:
+  - One value: maximum fraction digits (default `2`, minimum `0`).
+  - Two values: minimum and maximum fraction digits.
+- **Notes**:
+    - Scientific notation (e.g. `1e2`) is rejected.
+
+### `money`
+- **Description**: Validates a monetary amount: numeric, non-negative, with limited decimals.
+- **Usage**: `money` or `money:2`
+- **Parameters**:
+  - Max decimal places (default `2`).
+
+### `positive`
+- **Description**: Validates that the data is a number greater than zero.
+- **Usage**: `positive`
+- **Notes**:
+    - `0` fails; use `min:0` when zero should be allowed.
+
+### `currency`
+- **Description**: Validates an ISO 4217 currency code.
+- **Usage**: `currency`
+- **Notes**:
+    - Accepts codes such as `EUR`, `HUF`, `USD` (case-insensitive).
+
+### `amount_between`
+- **Description**: Validates that a numeric amount is within an inclusive range.
+- **Usage**: `amount_between:0.01,9999.99`
+- **Parameters**:
+  - `min,max` numeric bounds.
+
+### `credit_card`
+- **Description**: Validates a credit/debit card number using the Luhn checksum.
+- **Usage**: `credit_card`
+- **Notes**:
+    - Spaces and dashes are ignored.
+    - Length must be between 13 and 19 digits.
+
+### `card_brand`
+- **Description**: Validates that a card number matches one of the given brands.
+- **Usage**: `card_brand:visa,mastercard` or `card_brand`
+- **Parameters**:
+  - Comma-separated brands: `visa`, `mastercard`, `amex`, `discover`.
+- **Notes**:
+    - Without parameters, all supported brands are allowed.
+
+### `cvv`
+- **Description**: Validates a card CVV/CVC code.
+- **Usage**: `cvv` or `cvv:3` / `cvv:4`
+- **Notes**:
+    - Default accepts 3 or 4 digits.
+
+### `expiry_date`
+- **Description**: Validates a card expiry date that is not in the past.
+- **Usage**: `expiry_date` or `expiry_date:m/y`
+- **Notes**:
+    - Default format is `m/y`. Also supports formats such as `m/Y`, `ym`, `Y-m`.
+    - Compared against the end of the expiry month.
+
+### `account_number`
+- **Description**: Validates a domestic-style account number (digits only).
+- **Usage**: `account_number` or `account_number:8,17`
+- **Parameters**:
+  - Optional exact length, or `min,max` length.
+- **Notes**:
+    - Default length range is 4–34. Spaces and dashes are ignored.
+    - For IBAN numbers use `iban` instead.
+
+### `vat`
+- **Description**: Validates a VAT / tax identification number.
+- **Usage**: `vat` or `vat:EU` or `vat:RO`
+- **Parameters**:
+  - Optional country/region filter (`EU` or an ISO country code such as `RO`, `DE`).
+- **Notes**:
+    - EU mode expects a country prefix plus a country-specific alphanumeric body.
+
+### `percentage`
+- **Description**: Validates a percentage between 0 and 100 (inclusive).
+- **Usage**: `percentage` or `percentage:2`
+- **Parameters**:
+  - Optional maximum decimal places.
+
+### `minor_units`
+- **Description**: Validates a non-negative integer amount in minor units (e.g. cents).
+- **Usage**: `minor_units`
+- **Notes**:
+    - Accepts integers and digit-only strings. Floats such as `10.5` fail.
+
 ## Callable Rules
 
 Callable rules are custom validation rules defined as closures or callable functions. They should return a boolean value indicating whether the validation passed or failed.

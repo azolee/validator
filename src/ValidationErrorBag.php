@@ -63,6 +63,19 @@ class ValidationErrorBag implements ValidationErrorBagInterface
         'declined' => 'The :attribute must be declined.',
         'duration' => 'The :attribute must be a valid ISO 8601 duration.',
         'cron' => 'The :attribute must be a valid cron expression.',
+        'decimal' => 'The :attribute must be a valid decimal number.',
+        'money' => 'The :attribute must be a valid money amount.',
+        'positive' => 'The :attribute must be a positive number.',
+        'currency' => 'The :attribute must be a valid currency code.',
+        'amount_between' => 'The :attribute must be between :value and :value1.',
+        'credit_card' => 'The :attribute must be a valid credit card number.',
+        'card_brand' => 'The :attribute must be a valid :value card number.',
+        'cvv' => 'The :attribute must be a valid CVV code.',
+        'expiry_date' => 'The :attribute must be a valid future expiry date.',
+        'account_number' => 'The :attribute must be a valid account number.',
+        'vat' => 'The :attribute must be a valid VAT number.',
+        'percentage' => 'The :attribute must be a valid percentage.',
+        'minor_units' => 'The :attribute must be a non-negative integer in minor units.',
     ];
 
     /**
