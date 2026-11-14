@@ -216,7 +216,74 @@ This document describes the validation rules available in the `Azolee\Validator\
 - **Description**: Stops further validation for a field as soon as one rule fails.
 - **Usage**: `bail`
 
+### `bic`
+- **Description**: Validates that the data is a valid SWIFT/BIC code.
+- **Usage**: `bic`
+- **Notes**:
+    - Accepts 8-character (bank code) or 11-character (with branch) codes.
+    - Spaces are ignored; comparison is case-insensitive.
 
+### `cidr`
+- **Description**: Validates that the data is a valid CIDR notation (IPv4 or IPv6 with prefix length).
+- **Usage**: `cidr`
+- **Notes**:
+    - Requires `ip/prefix` form (e.g. `192.168.1.0/24`, `2001:db8::/32`).
+    - IPv4 prefix must be 0–32; IPv6 prefix must be 0–128.
+    - Unlike `ip`, a bare address without a prefix fails.
+
+### `required_array_keys`
+- **Description**: Validates that an array contains all of the given keys.
+- **Usage**: `required_array_keys:id,name,email`
+- **Parameters**:
+  - Comma-separated list of required keys.
+- **Notes**:
+    - Extra keys are allowed; only missing required keys fail.
+
+### `age_between`
+- **Description**: Validates that a date of birth yields an age within an inclusive range.
+- **Usage**: `age_between:18,65`
+- **Parameters**:
+  - `min,max` (int): Inclusive age bounds.
+- **Notes**:
+    - Parses the value as a date and compares against today's age.
+
+### `ean`
+- **Description**: Validates that the data is a valid EAN-8 or EAN-13 barcode (checksum included).
+- **Usage**: `ean`
+- **Notes**:
+    - Accepts 8- or 13-digit numeric codes.
+    - Checksum digit is verified.
+
+### `locale`
+- **Description**: Validates that the data is a locale / language tag.
+- **Usage**: `locale`
+- **Notes**:
+    - Accepts forms like `en`, `en_US`, and `pt-BR`.
+
+### `declined`
+- **Description**: Validates that the data is a declined boolean-like value.
+- **Usage**: `declined`
+- **Accepted values**:
+    - `no`, `off`, `0`, `false` (string)
+    - `false` (boolean)
+    - `0` (int/float)
+- **Notes**:
+    - Unlike most rules, `null` fails (the field must explicitly be declined).
+
+### `duration`
+- **Description**: Validates that the data is a valid ISO 8601 duration.
+- **Usage**: `duration`
+- **Examples**:
+    - `PT15M`
+    - `P1DT2H`
+    - `P1Y2M3DT4H5M6S`
+
+### `cron`
+- **Description**: Validates that the data is a valid 5-field cron expression.
+- **Usage**: `cron`
+- **Notes**:
+    - Expects minute, hour, day-of-month, month, day-of-week.
+    - Supports `*`, lists, ranges, and steps (e.g. `*/5`, `1-5`, `0,15,30,45`).
 
 ## Callable Rules
 
