@@ -30,6 +30,15 @@
 28. [HTML Safe](#example-html-safe)
 29. [MAC Address](#example-mac-address)
 30. [Domain](#example-domain)
+31. [BIC](#example-bic)
+32. [CIDR](#example-cidr)
+33. [Required Array Keys](#example-required-array-keys)
+34. [Age Between](#example-age-between)
+35. [EAN](#example-ean)
+36. [Locale](#example-locale)
+37. [Declined](#example-declined)
+38. [Duration](#example-duration)
+39. [Cron](#example-cron)
 
 
 
@@ -1168,6 +1177,278 @@ echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
 
 // Invalid: this is a URL, not a plain domain (should fail)
 $dataToValidate['host'] = 'https://example.com';
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+```
+
+### Example: `BIC`
+
+The bic rule validates a SWIFT/BIC code (8 or 11 characters). Spaces are ignored.
+
+```php
+<?php
+use Azolee\Validator\Validator;
+
+// BIC example
+$validationRules = [
+    'bank_code' => 'bic',
+];
+
+$dataToValidate = [
+    'bank_code' => 'DEUTDEFF',
+];
+
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+
+// Also valid with branch code
+$dataToValidate['bank_code'] = 'DEUTDEFF500';
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+
+// Invalid BIC (should fail)
+$dataToValidate['bank_code'] = 'INVALID';
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+```
+
+### Example: `CIDR`
+
+The cidr rule validates an IP address with a prefix length. Unlike `ip`, a bare address without `/prefix` fails.
+
+```php
+<?php
+use Azolee\Validator\Validator;
+
+// CIDR example
+$validationRules = [
+    'network' => 'cidr',
+];
+
+$dataToValidate = [
+    'network' => '192.168.1.0/24',
+];
+
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+
+// Also valid for IPv6
+$dataToValidate['network'] = '2001:db8::/32';
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+
+// Invalid: missing prefix (should fail)
+$dataToValidate['network'] = '192.168.1.0';
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+```
+
+### Example: `Required Array Keys`
+
+The required_array_keys rule ensures an array contains all listed keys. Extra keys are allowed.
+
+```php
+<?php
+use Azolee\Validator\Validator;
+
+// Required Array Keys example
+$validationRules = [
+    'user' => 'required_array_keys:id,name,email',
+];
+
+$dataToValidate = [
+    'user' => [
+        'id' => 1,
+        'name' => 'Ada',
+        'email' => 'ada@example.com',
+        'role' => 'admin', // extra keys are fine
+    ],
+];
+
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+
+// Missing required key (should fail)
+$dataToValidate['user'] = [
+    'id' => 1,
+    'name' => 'Ada',
+];
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+```
+
+### Example: `Age Between`
+
+The age_between rule checks that a date of birth yields an age inside an inclusive range.
+
+```php
+<?php
+use Azolee\Validator\Validator;
+
+// Age Between example
+$validationRules = [
+    'dob' => 'age_between:18,65',
+];
+
+$dataToValidate = [
+    'dob' => (new DateTimeImmutable('today'))->modify('-30 years')->format('Y-m-d'),
+];
+
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+
+// Too young (should fail)
+$dataToValidate['dob'] = (new DateTimeImmutable('today'))->modify('-10 years')->format('Y-m-d');
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+```
+
+### Example: `EAN`
+
+The ean rule validates EAN-8 and EAN-13 barcodes, including the checksum digit.
+
+```php
+<?php
+use Azolee\Validator\Validator;
+
+// EAN example
+$validationRules = [
+    'sku' => 'ean',
+];
+
+$dataToValidate = [
+    'sku' => '4006381333931', // valid EAN-13
+];
+
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+
+// Also valid EAN-8
+$dataToValidate['sku'] = '96385074';
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+
+// Invalid checksum (should fail)
+$dataToValidate['sku'] = '4006381333932';
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+```
+
+### Example: `Locale`
+
+The locale rule validates language / locale tags such as `en`, `en_US`, or `pt-BR`.
+
+```php
+<?php
+use Azolee\Validator\Validator;
+
+// Locale example
+$validationRules = [
+    'lang' => 'locale',
+];
+
+$dataToValidate = [
+    'lang' => 'en_US',
+];
+
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+
+// Also valid with hyphen
+$dataToValidate['lang'] = 'pt-BR';
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+
+// Invalid locale (should fail)
+$dataToValidate['lang'] = 'english';
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+```
+
+### Example: `Declined`
+
+The declined rule requires an explicitly declined value (`no`, `off`, `0`, `false`).
+
+```php
+<?php
+use Azolee\Validator\Validator;
+
+// Declined example
+$validationRules = [
+    'marketing_opt_in' => 'declined',
+];
+
+$dataToValidate = [
+    'marketing_opt_in' => 'no',
+];
+
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+
+// Not declined (should fail)
+$dataToValidate['marketing_opt_in'] = 'yes';
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+```
+
+### Example: `Duration`
+
+The duration rule validates ISO 8601 durations such as `PT15M` or `P1DT2H`.
+
+```php
+<?php
+use Azolee\Validator\Validator;
+
+// Duration example
+$validationRules = [
+    'ttl' => 'duration',
+];
+
+$dataToValidate = [
+    'ttl' => 'PT15M',
+];
+
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+
+// Also valid with days and hours
+$dataToValidate['ttl'] = 'P1DT2H';
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+
+// Invalid duration (should fail)
+$dataToValidate['ttl'] = '15 minutes';
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+```
+
+### Example: `Cron`
+
+The cron rule validates a 5-field cron expression (minute hour day-of-month month day-of-week).
+
+```php
+<?php
+use Azolee\Validator\Validator;
+
+// Cron example
+$validationRules = [
+    'schedule' => 'cron',
+];
+
+$dataToValidate = [
+    'schedule' => '*/5 * * * *',
+];
+
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+
+// Also valid with ranges
+$dataToValidate['schedule'] = '0 9 * * 1-5';
+$result = Validator::make($validationRules, $dataToValidate);
+echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
+
+// Invalid minute value (should fail)
+$dataToValidate['schedule'] = '60 * * * *';
 $result = Validator::make($validationRules, $dataToValidate);
 echo $result->isFailed() ? 'Validation failed' : 'Validation successful!';
 ```
