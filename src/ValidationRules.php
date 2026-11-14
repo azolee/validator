@@ -1227,4 +1227,552 @@ class ValidationRules
 
         return true;
     }
+
+    /**
+     * Validates that the data is numeric with at most the given number of decimal places.
+     * Usage: decimal or decimal:2 (default 2). With decimal:2,2 both min and max fraction digits.
+     *
+     * @param mixed $data
+     * @param string|null $key
+     * @param mixed|null $value
+     * @param array $dataToValidate
+     * @return bool
+     */
+    public static function decimal(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    {
+        if (is_null($data)) {
+            return true;
+        }
+
+        if (!is_numeric($data)) {
+            return false;
+        }
+
+        [$minDecimals, $maxDecimals] = self::parseDecimalBounds($value);
+
+        return self::decimalPlacesInRange((string) $data, $minDecimals, $maxDecimals);
+    }
+
+    /**
+     * Validates a monetary amount: numeric, non-negative, with limited decimal places.
+     * Usage: money or money:2
+     *
+     * @param mixed $data
+     * @param string|null $key
+     * @param mixed|null $value Max decimal places (default 2)
+     * @param array $dataToValidate
+     * @return bool
+     */
+    public static function money(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    {
+        if (is_null($data)) {
+            return true;
+        }
+
+        if (!is_numeric($data) || (float) $data < 0) {
+            return false;
+        }
+
+        $decimals = ($value === null || $value === '') ? 2 : (int) $value;
+
+        return self::decimalPlacesInRange((string) $data, 0, $decimals);
+    }
+
+    /**
+     * Validates that the data is a number greater than zero.
+     *
+     * @param mixed $data
+     * @param string|null $key
+     * @param mixed|null $value
+     * @param array $dataToValidate
+     * @return bool
+     */
+    public static function positive(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    {
+        if (is_null($data)) {
+            return true;
+        }
+
+        return is_numeric($data) && (float) $data > 0;
+    }
+
+    /**
+     * Validates an ISO 4217 currency code.
+     *
+     * @param mixed $data
+     * @param string|null $key
+     * @param mixed|null $value
+     * @param array $dataToValidate
+     * @return bool
+     */
+    public static function currency(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    {
+        if (is_null($data)) {
+            return true;
+        }
+
+        if (!is_string($data) && !is_numeric($data)) {
+            return false;
+        }
+
+        $code = strtoupper(trim((string) $data));
+
+        return isset(self::iso4217Currencies()[$code]);
+    }
+
+    /**
+     * Validates that a numeric amount is between two inclusive bounds.
+     * Usage: amount_between:0.01,9999.99
+     *
+     * @param mixed $data
+     * @param string|null $key
+     * @param mixed|null $value
+     * @param array $dataToValidate
+     * @return bool
+     */
+    public static function amount_between(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    {
+        if (is_null($data)) {
+            return true;
+        }
+
+        if (!is_numeric($data)) {
+            return false;
+        }
+
+        $parts = array_map('trim', explode(',', (string) $value));
+        if (count($parts) !== 2 || !is_numeric($parts[0]) || !is_numeric($parts[1])) {
+            return false;
+        }
+
+        $amount = (float) $data;
+        $min = (float) $parts[0];
+        $max = (float) $parts[1];
+
+        return $amount >= $min && $amount <= $max;
+    }
+
+    /**
+     * Validates a credit/debit card number using the Luhn checksum.
+     *
+     * @param mixed $data
+     * @param string|null $key
+     * @param mixed|null $value
+     * @param array $dataToValidate
+     * @return bool
+     */
+    public static function credit_card(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    {
+        if (is_null($data)) {
+            return true;
+        }
+
+        if (!is_string($data) && !is_int($data)) {
+            return false;
+        }
+
+        $number = preg_replace('/[\s-]+/', '', (string) $data);
+        if ($number === null || !ctype_digit($number)) {
+            return false;
+        }
+
+        $length = strlen($number);
+        if ($length < 13 || $length > 19) {
+            return false;
+        }
+
+        return self::luhnCheck($number);
+    }
+
+    /**
+     * Validates that a card number matches one of the given brands.
+     * Usage: card_brand:visa,mastercard,amex,discover
+     *
+     * @param mixed $data
+     * @param string|null $key
+     * @param mixed|null $value Comma-separated brand list
+     * @param array $dataToValidate
+     * @return bool
+     */
+    public static function card_brand(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    {
+        if (is_null($data)) {
+            return true;
+        }
+
+        if (!is_string($data) && !is_int($data)) {
+            return false;
+        }
+
+        $number = preg_replace('/[\s-]+/', '', (string) $data);
+        if ($number === null || !ctype_digit($number)) {
+            return false;
+        }
+
+        $allowed = [];
+        foreach (explode(',', (string) $value) as $brand) {
+            $brand = strtolower(trim($brand));
+            if ($brand !== '') {
+                $allowed[] = $brand;
+            }
+        }
+
+        if ($allowed === []) {
+            $allowed = ['visa', 'mastercard', 'amex', 'discover'];
+        }
+
+        $detected = self::detectCardBrand($number);
+
+        return $detected !== null && in_array($detected, $allowed, true);
+    }
+
+    /**
+     * Validates a card CVV/CVC code.
+     * Usage: cvv (3 or 4 digits) or cvv:3 / cvv:4
+     *
+     * @param mixed $data
+     * @param string|null $key
+     * @param mixed|null $value
+     * @param array $dataToValidate
+     * @return bool
+     */
+    public static function cvv(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    {
+        if (is_null($data)) {
+            return true;
+        }
+
+        if (!is_string($data) && !is_int($data)) {
+            return false;
+        }
+
+        $cvv = (string) $data;
+        if (!ctype_digit($cvv)) {
+            return false;
+        }
+
+        if ($value === null || $value === '') {
+            return in_array(strlen($cvv), [3, 4], true);
+        }
+
+        return strlen($cvv) === (int) $value;
+    }
+
+    /**
+     * Validates a card expiry date that is not in the past.
+     * Usage: expiry_date or expiry_date:m/y (also supports m/Y, ym, Y-m)
+     *
+     * @param mixed $data
+     * @param string|null $key
+     * @param mixed|null $value Format string
+     * @param array $dataToValidate
+     * @return bool
+     */
+    public static function expiry_date(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    {
+        if (is_null($data)) {
+            return true;
+        }
+
+        if (!is_string($data) && !is_numeric($data)) {
+            return false;
+        }
+
+        $format = ($value === null || $value === '') ? 'm/y' : (string) $value;
+        $raw = trim((string) $data);
+
+        $date = \DateTimeImmutable::createFromFormat('!' . $format, $raw);
+        $errors = \DateTimeImmutable::getLastErrors();
+        if ($date === false || ($errors['warning_count'] ?? 0) > 0 || ($errors['error_count'] ?? 0) > 0) {
+            return false;
+        }
+
+        $month = (int) $date->format('n');
+        if ($month < 1 || $month > 12) {
+            return false;
+        }
+
+        $expiryEnd = $date->modify('last day of this month')->setTime(23, 59, 59);
+        $now = new \DateTimeImmutable('now');
+
+        return $expiryEnd >= $now;
+    }
+
+    /**
+     * Validates a domestic-style account number (digits only).
+     * Usage: account_number or account_number:8,17
+     *
+     * @param mixed $data
+     * @param string|null $key
+     * @param mixed|null $value Optional min,max length
+     * @param array $dataToValidate
+     * @return bool
+     */
+    public static function account_number(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    {
+        if (is_null($data)) {
+            return true;
+        }
+
+        if (!is_string($data) && !is_int($data)) {
+            return false;
+        }
+
+        $number = preg_replace('/[\s-]+/', '', (string) $data);
+        if ($number === null || !ctype_digit($number)) {
+            return false;
+        }
+
+        $length = strlen($number);
+        $min = 4;
+        $max = 34;
+
+        if ($value !== null && $value !== '') {
+            $parts = array_map('trim', explode(',', (string) $value));
+            if (count($parts) === 1 && ctype_digit($parts[0])) {
+                $min = (int) $parts[0];
+                $max = $min;
+            } elseif (count($parts) === 2 && ctype_digit($parts[0]) && ctype_digit($parts[1])) {
+                $min = (int) $parts[0];
+                $max = (int) $parts[1];
+            } else {
+                return false;
+            }
+        }
+
+        return $length >= $min && $length <= $max;
+    }
+
+    /**
+     * Validates a VAT / tax identification number.
+     * Usage: vat or vat:EU or vat:RO (country/region filter)
+     *
+     * @param mixed $data
+     * @param string|null $key
+     * @param mixed|null $value
+     * @param array $dataToValidate
+     * @return bool
+     */
+    public static function vat(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    {
+        if (is_null($data)) {
+            return true;
+        }
+
+        if (!is_string($data) && !is_numeric($data)) {
+            return false;
+        }
+
+        $vat = strtoupper(preg_replace('/[\s.-]+/', '', (string) $data) ?? '');
+        if ($vat === '') {
+            return false;
+        }
+
+        $filter = strtoupper(trim((string) $value));
+        $lengths = self::euVatLengths();
+
+        if ($filter === '' || $filter === 'EU') {
+            if (!preg_match('/^([A-Z]{2})([A-Z0-9]{2,12})$/', $vat, $matches)) {
+                return false;
+            }
+            $country = $matches[1];
+            $number = $matches[2];
+
+            return isset($lengths[$country]) && in_array(strlen($number), (array) $lengths[$country], true);
+        }
+
+        if (isset($lengths[$filter])) {
+            if (str_starts_with($vat, $filter)) {
+                $number = substr($vat, 2);
+            } else {
+                $number = $vat;
+            }
+
+            return ctype_alnum($number) && in_array(strlen($number), (array) $lengths[$filter], true);
+        }
+
+        return preg_match('/^[A-Z0-9]{8,14}$/', $vat) === 1;
+    }
+
+    /**
+     * Validates a percentage value between 0 and 100 (inclusive).
+     * Usage: percentage or percentage:2 (max decimal places)
+     *
+     * @param mixed $data
+     * @param string|null $key
+     * @param mixed|null $value Optional max decimal places
+     * @param array $dataToValidate
+     * @return bool
+     */
+    public static function percentage(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    {
+        if (is_null($data)) {
+            return true;
+        }
+
+        if (!is_numeric($data)) {
+            return false;
+        }
+
+        $amount = (float) $data;
+        if ($amount < 0 || $amount > 100) {
+            return false;
+        }
+
+        if ($value === null || $value === '') {
+            return true;
+        }
+
+        return self::decimalPlacesInRange((string) $data, 0, (int) $value);
+    }
+
+    /**
+     * Validates a minor-units amount (non-negative integer, e.g. cents).
+     *
+     * @param mixed $data
+     * @param string|null $key
+     * @param mixed|null $value
+     * @param array $dataToValidate
+     * @return bool
+     */
+    public static function minor_units(mixed $data, ?string $key = null, mixed $value = null, array $dataToValidate = []): bool
+    {
+        if (is_null($data)) {
+            return true;
+        }
+
+        if (is_int($data)) {
+            return $data >= 0;
+        }
+
+        if (is_string($data) && ctype_digit($data)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static function parseDecimalBounds(mixed $value): array
+    {
+        if ($value === null || $value === '') {
+            return [0, 2];
+        }
+
+        $parts = array_map('trim', explode(',', (string) $value));
+        if (count($parts) === 1) {
+            $max = (int) $parts[0];
+
+            return [0, $max];
+        }
+
+        return [(int) $parts[0], (int) $parts[1]];
+    }
+
+    private static function decimalPlacesInRange(string $number, int $minDecimals, int $maxDecimals): bool
+    {
+        if (!is_numeric($number) || stripos($number, 'e') !== false) {
+            return false;
+        }
+
+        $normalized = ltrim($number, '+');
+        if (!str_contains($normalized, '.')) {
+            $decimals = 0;
+        } else {
+            $decimals = strlen(substr($normalized, strrpos($normalized, '.') + 1));
+        }
+
+        return $decimals >= $minDecimals && $decimals <= $maxDecimals;
+    }
+
+    private static function luhnCheck(string $number): bool
+    {
+        $sum = 0;
+        $alt = false;
+
+        for ($i = strlen($number) - 1; $i >= 0; $i--) {
+            $digit = (int) $number[$i];
+            if ($alt) {
+                $digit *= 2;
+                if ($digit > 9) {
+                    $digit -= 9;
+                }
+            }
+            $sum += $digit;
+            $alt = !$alt;
+        }
+
+        return $sum % 10 === 0;
+    }
+
+    private static function detectCardBrand(string $number): ?string
+    {
+        if (preg_match('/^4[0-9]{12}(?:[0-9]{3,6})?$/', $number)) {
+            return 'visa';
+        }
+
+        if (
+            preg_match('/^5[1-5][0-9]{14}$/', $number)
+            || preg_match('/^2(2[2-9][0-9]|[3-6][0-9]{2}|7[01][0-9]|720)[0-9]{12}$/', $number)
+        ) {
+            return 'mastercard';
+        }
+
+        if (preg_match('/^3[47][0-9]{13}$/', $number)) {
+            return 'amex';
+        }
+
+        if (
+            preg_match('/^6011[0-9]{12}$/', $number)
+            || preg_match('/^65[0-9]{14}$/', $number)
+            || preg_match('/^64[4-9][0-9]{13}$/', $number)
+        ) {
+            return 'discover';
+        }
+
+        return null;
+    }
+
+    private static function iso4217Currencies(): array
+    {
+        static $currencies = null;
+
+        if ($currencies !== null) {
+            return $currencies;
+        }
+
+        $codes = [
+            'AED', 'AFN', 'ALL', 'AMD', 'ANG', 'AOA', 'ARS', 'AUD', 'AWG', 'AZN',
+            'BAM', 'BBD', 'BDT', 'BGN', 'BHD', 'BIF', 'BMD', 'BND', 'BOB', 'BRL',
+            'BSD', 'BTN', 'BWP', 'BYN', 'BZD', 'CAD', 'CDF', 'CHF', 'CLP', 'CNY',
+            'COP', 'CRC', 'CUP', 'CVE', 'CZK', 'DJF', 'DKK', 'DOP', 'DZD', 'EGP',
+            'ERN', 'ETB', 'EUR', 'FJD', 'FKP', 'GBP', 'GEL', 'GHS', 'GIP', 'GMD',
+            'GNF', 'GTQ', 'GYD', 'HKD', 'HNL', 'HRK', 'HTG', 'HUF', 'IDR', 'ILS',
+            'INR', 'IQD', 'IRR', 'ISK', 'JMD', 'JOD', 'JPY', 'KES', 'KGS', 'KHR',
+            'KMF', 'KPW', 'KRW', 'KWD', 'KYD', 'KZT', 'LAK', 'LBP', 'LKR', 'LRD',
+            'LSL', 'LYD', 'MAD', 'MDL', 'MGA', 'MKD', 'MMK', 'MNT', 'MOP', 'MRU',
+            'MUR', 'MVR', 'MWK', 'MXN', 'MYR', 'MZN', 'NAD', 'NGN', 'NIO', 'NOK',
+            'NPR', 'NZD', 'OMR', 'PAB', 'PEN', 'PGK', 'PHP', 'PKR', 'PLN', 'PYG',
+            'QAR', 'RON', 'RSD', 'RUB', 'RWF', 'SAR', 'SBD', 'SCR', 'SDG', 'SEK',
+            'SGD', 'SHP', 'SLE', 'SOS', 'SRD', 'SSP', 'STN', 'SVC', 'SYP', 'SZL',
+            'THB', 'TJS', 'TMT', 'TND', 'TOP', 'TRY', 'TTD', 'TWD', 'TZS', 'UAH',
+            'UGX', 'USD', 'UYU', 'UZS', 'VES', 'VND', 'VUV', 'WST', 'XAF', 'XCD',
+            'XOF', 'XPF', 'YER', 'ZAR', 'ZMW', 'ZWL',
+        ];
+
+        $currencies = array_fill_keys($codes, true);
+
+        return $currencies;
+    }
+
+    private static function euVatLengths(): array
+    {
+        return [
+            'AT' => 9, 'BE' => [9, 10], 'BG' => [9, 10], 'CY' => 9, 'CZ' => [8, 9, 10],
+            'DE' => 9, 'DK' => 8, 'EE' => 9, 'EL' => 9, 'GR' => 9, 'ES' => 9, 'FI' => 8,
+            'FR' => 11, 'HR' => 11, 'HU' => 8, 'IE' => [8, 9], 'IT' => 11, 'LT' => [9, 12],
+            'LU' => 8, 'LV' => 11, 'MT' => 8, 'NL' => 12, 'PL' => 10, 'PT' => 9,
+            'RO' => [2, 3, 4, 5, 6, 7, 8, 9, 10], 'SE' => 12, 'SI' => 8, 'SK' => 10,
+            'XI' => [5, 9, 12],
+        ];
+    }
 }
